@@ -1,2 +1,7 @@
-# -A-SIMPLE-CODE-FOR-JAVA
-a tiny code which brings the  difference
+Public class Simple
+{
+  public static void main(String[]args)
+  {
+     Sysytem.out.println("hello i am shashank");
+     }
+}
