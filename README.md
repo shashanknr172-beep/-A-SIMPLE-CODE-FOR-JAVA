@@ -1,4 +1,5 @@
-/its the simple code which represents the concept of nested loop in java programming.
+/its the simple code which represents the concept of nested loop in java programming
+
 /Say "hi" once → then say "bye" twice
 
  class Simple {
