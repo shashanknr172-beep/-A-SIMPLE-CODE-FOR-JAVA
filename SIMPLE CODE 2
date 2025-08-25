@@ -1,0 +1,53 @@
+#Car Speed & Fuel Monitoring System in Java
+#Helps beginners understand how Java classes and objects work
+#Shows how to simulate real-world automotive systems in code
+#This project is a simple Java program that simulates a basic vehicle monitoring system
+
+class Car {
+    private String model;
+    private double speed;   // km/h
+    private double fuel;    // liters
+
+    public Car(String model, double fuel) {
+        this.model = model;
+        this.fuel = fuel;
+        this.speed = 0;
+    }
+
+    public void accelerate(double amount) {
+        if (fuel > 0) {
+            speed += amount;
+            fuel -= amount * 0.2; // fuel consumption
+            if (speed > 200) speed = 200; // speed limit
+        } else {
+            System.out.println("❌ Out of fuel!");
+        }
+    }
+
+    public void brake(double amount) {
+        speed -= amount;
+        if (speed < 0) speed = 0;
+    }
+
+    public void displayStatus() {
+        System.out.println(model + " -> Speed: " + speed + " km/h | Fuel: " + fuel + " L");
+    }
+}
+
+public class CarMonitor {
+    public static void main(String[] args) {
+        Car car = new Car("Toyota Supra", 20);
+
+        car.displayStatus();
+        car.accelerate(50);
+        car.displayStatus();
+        car.accelerate(30);
+        car.displayStatus();
+        car.brake(40);
+        car.displayStatus();
+        car.accelerate(200); // try max speed
+        car.displayStatus();
+    }
+}
+
+
