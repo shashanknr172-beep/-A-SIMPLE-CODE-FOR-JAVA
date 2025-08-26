@@ -1,0 +1,108 @@
+// Car Rental System - Example Program (~100 lines)
+// Demonstrates Object-Oriented Programming in Java
+// Includes classes, encapsulation, arrays, loops, and user input
+
+import java.util.Scanner;
+
+class Car {
+    private String brand;
+    private String model;
+    private double pricePerDay;
+    private boolean available;
+
+    public Car(String brand, String model, double pricePerDay) {
+        this.brand = brand;
+        this.model = model;
+        this.pricePerDay = pricePerDay;
+        this.available = true; // initially available
+    }
+
+    public String getDetails() {
+        return brand + " " + model + " | $" + pricePerDay + " per day | " +
+               (available ? "Available" : "Rented");
+    }
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void rent() {
+        available = false;
+    }
+
+    public void returnCar() {
+        available = true;
+    }
+
+    public double getPricePerDay() {
+        return pricePerDay;
+    }
+}
+
+public class CarRentalSystem {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // Fleet of cars
+        Car[] cars = {
+            new Car("Toyota", "Corolla", 40),
+            new Car("Honda", "Civic", 50),
+            new Car("Tesla", "Model 3", 100),
+            new Car("BMW", "X5", 120),
+            new Car("Audi", "A4", 90)
+        };
+
+        while (true) {
+            System.out.println("\n=== Welcome to Car Rental System ===");
+            System.out.println("1. View Cars");
+            System.out.println("2. Rent a Car");
+            System.out.println("3. Return a Car");
+            System.out.println("4. Exit");
+            System.out.print("Enter your choice: ");
+            int choice = sc.nextInt();
+
+            switch (choice) {
+                case 1: // view cars
+                    System.out.println("\nAvailable Cars:");
+                    for (int i = 0; i < cars.length; i++) {
+                        System.out.println((i + 1) + ". " + cars[i].getDetails());
+                    }
+                    break;
+
+                case 2: // rent car
+                    System.out.print("Enter car number to rent: ");
+                    int rentChoice = sc.nextInt();
+                    if (rentChoice < 1 || rentChoice > cars.length) {
+                        System.out.println("Invalid selection.");
+                    } else if (!cars[rentChoice - 1].isAvailable()) {
+                        System.out.println("Sorry, car already rented.");
+                    } else {
+                        cars[rentChoice - 1].rent();
+                        System.out.println("Car rented successfully!");
+                    }
+                    break;
+
+                case 3: // return car
+                    System.out.print("Enter car number to return: ");
+                    int returnChoice = sc.nextInt();
+                    if (returnChoice < 1 || returnChoice > cars.length) {
+                        System.out.println("Invalid selection.");
+                    } else if (cars[returnChoice - 1].isAvailable()) {
+                        System.out.println("This car was not rented.");
+                    } else {
+                        cars[returnChoice - 1].returnCar();
+                        System.out.println("Car returned successfully!");
+                    }
+                    break;
+
+                case 4: // exit
+                    System.out.println("Thank you for using Car Rental System!");
+                    sc.close();
+                    return;
+
+                default:
+                    System.out.println("Invalid choice. Try again.");
+            }
+        }
+    }
+}
