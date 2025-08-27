@@ -1,0 +1,113 @@
+#Project Structure
+
+SmartParkingSystem/
+ ┣ ParkingLot.java
+ ┣ Car.java
+ ┗ Main.java
+
+
+#Car.java
+
+SmartParkingSypublic class Car {
+    private String plateNumber;
+    private String owner;
+
+    public Car(String plateNumber, String owner) {
+        this.plateNumber = plateNumber;
+        this.owner = owner;
+    }
+
+    public String getPlateNumber() {
+        return plateNumber;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    @Override
+    public String toString() {
+        return "Car{" +
+                "plate='" + plateNumber + '\'' +
+                ", owner='" + owner + '\'' +
+                '}';
+    }
+}
+
+#ParkingLot.java
+
+import java.util.*;
+
+public class ParkingLot {
+    private int capacity;
+    private Map<String, Car> parkedCars;
+
+    public ParkingLot(int capacity) {
+        this.capacity = capacity;
+        this.parkedCars = new HashMap<>();
+    }
+
+    public boolean parkCar(Car car) {
+        if (parkedCars.size() < capacity) {
+            if (!parkedCars.containsKey(car.getPlateNumber())) {
+                parkedCars.put(car.getPlateNumber(), car);
+                System.out.println("✅ " + car + " parked.");
+                return true;
+            } else {
+                System.out.println("❌ Car already parked!");
+            }
+        } else {
+            System.out.println("❌ Parking lot full!");
+        }
+        return false;
+    }
+
+    public boolean removeCar(String plateNumber) {
+        if (parkedCars.containsKey(plateNumber)) {
+            Car removed = parkedCars.remove(plateNumber);
+            System.out.println("🚗 " + removed + " left the parking lot.");
+            return true;
+        } else {
+            System.out.println("❌ No car with plate " + plateNumber + " found.");
+        }
+        return false;
+    }
+
+    public void displayStatus() {
+        System.out.println("\n📊 Parking Lot Status:");
+        System.out.println("Capacity: " + capacity + " | Occupied: " + parkedCars.size() +
+                " | Available: " + (capacity - parkedCars.size()));
+        for (Car car : parkedCars.values()) {
+            System.out.println(" - " + car);
+        }
+        System.out.println();
+    }
+}
+
+#Main.java
+
+public class Main {
+    public static void main(String[] args) {
+        ParkingLot lot = new ParkingLot(3);
+
+        Car c1 = new Car("KA01AB1234", "Rahul");
+        Car c2 = new Car("KA02CD5678", "Ayesha");
+        Car c3 = new Car("KA03EF1111", "Vikram");
+        Car c4 = new Car("KA04GH2222", "Meena");
+
+        lot.parkCar(c1);
+        lot.parkCar(c2);
+        lot.parkCar(c3);
+        lot.displayStatus();
+
+        lot.parkCar(c4); // should fail (lot full)
+        lot.removeCar("KA02CD5678");
+        lot.displayStatus();
+
+        lot.parkCar(c4); // now possible
+        lot.displayStatus();
+    }
+}
+
+
+
