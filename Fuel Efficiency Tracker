@@ -1,0 +1,90 @@
+#Project Structure
+
+FuelEfficiencyTracker/
+ ┣ Car.java
+ ┣ Trip.java
+ ┗ Main.java
+
+#Car.java
+
+import java.util.*;
+
+public class Car {
+    private String model;
+    private double fuelCapacity;
+    private double totalDistance;
+    private double totalFuel;
+    private List<Trip> trips;
+
+    public Car(String model, double fuelCapacity) {
+        this.model = model;
+        this.fuelCapacity = fuelCapacity;
+        this.trips = new ArrayList<>();
+    }
+
+    public void addTrip(Trip trip) {
+        if (trip.getFuelUsed() <= fuelCapacity) {
+            trips.add(trip);
+            totalDistance += trip.getDistance();
+            totalFuel += trip.getFuelUsed();
+            System.out.println("✅ Trip added: " + trip);
+        } else {
+            System.out.println("❌ Trip fuel exceeds car tank capacity!");
+        }
+    }
+
+    public double calculateMileage() {
+        return (totalFuel > 0) ? totalDistance / totalFuel : 0;
+    }
+
+    public void displayReport() {
+        System.out.println("\n📊 Car Report: " + model);
+        System.out.println("Total Distance: " + totalDistance + " km");
+        System.out.println("Total Fuel: " + totalFuel + " L");
+        System.out.println("Average Mileage: " + calculateMileage() + " km/L");
+        System.out.println("\nTrips:");
+        for (Trip t : trips) {
+            System.out.println(" - " + t);
+        }
+    }
+}
+
+#Trip.java
+
+public class Trip {
+    private double distance; // km
+    private double fuelUsed; // L
+
+    public Trip(double distance, double fuelUsed) {
+        this.distance = distance;
+        this.fuelUsed = fuelUsed;
+    }
+
+    public double getDistance() {
+        return distance;
+    }
+
+    public double getFuelUsed() {
+        return fuelUsed;
+    }
+
+    @Override
+    public String toString() {
+        return "Trip{distance=" + distance + " km, fuel=" + fuelUsed + " L}";
+    }
+}
+
+#Main.java
+
+public class Main {
+    public static void main(String[] args) {
+        Car car = new Car("Honda City", 40);
+
+        car.addTrip(new Trip(120, 8));
+        car.addTrip(new Trip(200, 12));
+        car.addTrip(new Trip(300, 20));
+        car.addTrip(new Trip(100, 50)); // should fail (exceeds tank capacity)
+
+        car.displayReport();
+    }
+}
