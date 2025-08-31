@@ -1,0 +1,89 @@
+#Project Structure
+
+VehicleSpeedTracker/
+ ┣ Vehicle.java
+ ┣ SpeedMonitor.java
+ ┗ Main.java
+
+#Vehicle.java
+
+public class Vehicle {
+    private String plateNumber;
+    private String model;
+    private double speed; // km/h
+
+    public Vehicle(String plateNumber, String model) {
+        this.plateNumber = plateNumber;
+        this.model = model;
+        this.speed = 0;
+    }
+
+    public void accelerate(double amount) {
+        speed += amount;
+        if (speed > 250) speed = 250; // hard limit
+    }
+
+    public void brake(double amount) {
+        speed -= amount;
+        if (speed < 0) speed = 0;
+    }
+
+    public double getSpeed() {
+        return speed;
+    }
+
+    public String getInfo() {
+        return model + " (" + plateNumber + ")";
+    }
+}
+
+ #SpeedMonitor.java
+
+public class SpeedMonitor {
+    private double minLimit;
+    private double maxLimit;
+
+    public SpeedMonitor(double minLimit, double maxLimit) {
+        this.minLimit = minLimit;
+        this.maxLimit = maxLimit;
+    }
+
+    public void checkSpeed(Vehicle v) {
+        double speed = v.getSpeed();
+        System.out.print(v.getInfo() + " -> Speed: " + speed + " km/h ");
+
+        if (speed < minLimit) {
+            System.out.println("⚠️ Too Slow! Risk of traffic obstruction.");
+        } else if (speed > maxLimit) {
+            System.out.println("🚨 Overspeeding! Risk of accident.");
+        } else {
+            System.out.println("✅ Speed within safe limits.");
+        }
+    }
+}
+
+#Main.java
+
+public class Main {
+    public static void main(String[] args) {
+        Vehicle car = new Vehicle("KA05MN4321", "BMW M5");
+        SpeedMonitor monitor = new SpeedMonitor(40, 120);
+
+        // Simulation of driving
+        car.accelerate(30);
+        monitor.checkSpeed(car);
+
+        car.accelerate(50);
+        monitor.checkSpeed(car);
+
+        car.accelerate(60);
+        monitor.checkSpeed(car);
+
+        car.brake(80);
+        monitor.checkSpeed(car);
+
+        car.accelerate(200); // extreme
+        monitor.checkSpeed(car);
+    }
+}
+
