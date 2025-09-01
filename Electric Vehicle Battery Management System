@@ -1,0 +1,96 @@
+#Project Structure
+
+EVBatterySystem/
+ ┣ Battery.java
+ ┣ ElectricCar.java
+ ┗ Main.java
+
+#Battery.java
+
+public class Battery {
+    private double capacity;   // kWh
+    private double level;      // current charge %
+
+    public Battery(double capacity) {
+        this.capacity = capacity;
+        this.level = 100; // fully charged
+    }
+
+    public void discharge(double amount) {
+        level -= amount;
+        if (level < 0) level = 0;
+    }
+
+    public void charge(double amount) {
+        level += amount;
+        if (level > 100) level = 100;
+    }
+
+    public double getLevel() {
+        return level;
+    }
+
+    public double getCapacity() {
+        return capacity;
+    }
+
+    public void status() {
+        System.out.println("🔋 Battery: " + level + "% (" + capacity + " kWh)");
+    }
+}
+
+#ElectricCar.java
+
+public class ElectricCar {
+    private String model;
+    private Battery battery;
+    private double efficiency; // km per 1% battery
+
+    public ElectricCar(String model, double capacity, double efficiency) {
+        this.model = model;
+        this.battery = new Battery(capacity);
+        this.efficiency = efficiency;
+    }
+
+    public void drive(double distance) {
+        double consumption = distance / efficiency;
+        battery.discharge(consumption);
+        System.out.println("🚗 " + model + " drove " + distance + " km. Battery used: " 
+                           + (int)consumption + "%");
+        if (battery.getLevel() <= 15) {
+            System.out.println("⚠️ Low Battery! Please recharge soon.");
+        }
+    }
+
+    public void charge(double percent) {
+        battery.charge(percent);
+        System.out.println("⚡ Charging " + percent + "%...");
+    }
+
+    public void displayStatus() {
+        System.out.println("\n📊 Car: " + model);
+        battery.status();
+    }
+}
+
+#Main.java
+
+public class Main {
+    public static void main(String[] args) {
+        ElectricCar car = new ElectricCar("Tesla Model 3", 75, 5); // 5 km per 1% battery
+
+        car.displayStatus();
+        car.drive(120);
+        car.displayStatus();
+
+        car.drive(200);
+        car.displayStatus();
+
+        car.charge(30);
+        car.displayStatus();
+
+        car.drive(250); // big trip
+        car.displayStatus();
+    }
+}
+
