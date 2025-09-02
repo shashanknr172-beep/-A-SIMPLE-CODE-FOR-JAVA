@@ -1,0 +1,81 @@
+import java.util.Random;
+import java.util.Scanner;
+
+class Bike {
+    private String name;
+    private double fuel; // liters
+    private double distance; // km
+    private double speed; // km/h
+
+    public Bike(String name, double fuel) {
+        this.name = name;
+        this.fuel = fuel;
+        this.distance = 0;
+        this.speed = 0;
+    }
+
+    public void raceTurn() {
+        if (fuel <= 0) {
+            System.out.println(name + " is out of fuel!");
+            return;
+        }
+        Random rand = new Random();
+        speed = 40 + rand.nextInt(61); // random speed between 40–100 km/h
+        double travel = speed * 0.1; // distance for this turn (0.1 hr ~ 6 min)
+        double fuelUsed = travel / 30; // assume 30 km/L mileage
+        if (fuelUsed <= fuel) {
+            distance += travel;
+            fuel -= fuelUsed;
+        } else {
+            distance += fuel * 30; // use last bit of fuel
+            fuel = 0;
+        }
+        System.out.println(name + " raced at " + speed + " km/h, total: " 
+                           + String.format("%.2f", distance) + " km, fuel left: "
+                           + String.format("%.2f", fuel) + " L");
+    }
+
+    public double getDistance() {
+        return distance;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+
+public class BikeRaceSimulator {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // Setup race
+        System.out.print("Enter first biker name: ");
+        String b1 = sc.nextLine();
+        System.out.print("Enter second biker name: ");
+        String b2 = sc.nextLine();
+
+        Bike bike1 = new Bike(b1, 5); // 5 liters fuel
+        Bike bike2 = new Bike(b2, 5);
+
+        System.out.println("\n--- Bike Race Begins ---");
+        for (int round = 1; round <= 10; round++) {
+            System.out.println("\n--- Round " + round + " ---");
+            bike1.raceTurn();
+            bike2.raceTurn();
+        }
+
+        // Decide winner
+        System.out.println("\n--- Race Over ---");
+        if (bike1.getDistance() > bike2.getDistance()) {
+            System.out.println(bike1.getName() + " wins with " 
+                               + String.format("%.2f", bike1.getDistance()) + " km!");
+        } else if (bike2.getDistance() > bike1.getDistance()) {
+            System.out.println(bike2.getName() + " wins with " 
+                               + String.format("%.2f", bike2.getDistance()) + " km!");
+        } else {
+            System.out.println("It's a tie! Both covered " 
+                               + String.format("%.2f", bike1.getDistance()) + " km.");
+        }
+        sc.close();
+    }
+}
