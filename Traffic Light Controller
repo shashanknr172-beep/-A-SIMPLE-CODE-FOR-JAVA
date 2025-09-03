@@ -1,0 +1,46 @@
+import java.util.concurrent.TimeUnit;
+
+class TrafficLight {
+    private String color;
+    private int duration; // seconds
+
+    public TrafficLight(String color, int duration) {
+        this.color = color;
+        this.duration = duration;
+    }
+
+    public void showLight() {
+        System.out.println("Light is " + color + " for " + duration + " seconds.");
+        try {
+            TimeUnit.SECONDS.sleep(duration); // simulate real-time waiting
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public String getColor() {
+        return color;
+    }
+}
+
+public class TrafficLightSimulator {
+    public static void main(String[] args) {
+        // Define lights with their durations
+        TrafficLight red = new TrafficLight("RED", 5);
+        TrafficLight green = new TrafficLight("GREEN", 4);
+        TrafficLight yellow = new TrafficLight("YELLOW", 2);
+
+        System.out.println("--- Traffic Light Simulation ---");
+
+        // Simulate 3 full cycles
+        for (int cycle = 1; cycle <= 3; cycle++) {
+            System.out.println("\nCycle " + cycle + ":");
+            red.showLight();
+            green.showLight();
+            yellow.showLight();
+        }
+
+        System.out.println("\nSimulation Complete. Intersection is clear.");
+    }
+}
+
