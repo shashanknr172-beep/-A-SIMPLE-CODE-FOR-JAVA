@@ -1,0 +1,80 @@
+import java.util.*;
+
+class ParkingLot {
+    private int capacity;
+    private Set<String> parkedVehicles;
+
+    public ParkingLot(int capacity) {
+        this.capacity = capacity;
+        this.parkedVehicles = new HashSet<>();
+    }
+
+    public void parkVehicle(String plate) {
+        if (parkedVehicles.size() < capacity) {
+            if (parkedVehicles.add(plate)) {
+                System.out.println("✅ Vehicle " + plate + " parked successfully.");
+            } else {
+                System.out.println("⚠️ Vehicle " + plate + " is already parked.");
+            }
+        } else {
+            System.out.println("❌ Parking lot full! Cannot park " + plate);
+        }
+    }
+
+    public void removeVehicle(String plate) {
+        if (parkedVehicles.remove(plate)) {
+            System.out.println("🚗 Vehicle " + plate + " has left the parking lot.");
+        } else {
+            System.out.println("⚠️ Vehicle " + plate + " not found.");
+        }
+    }
+
+    public void status() {
+        System.out.println("\n--- Parking Lot Status ---");
+        System.out.println("Capacity: " + capacity);
+        System.out.println("Occupied: " + parkedVehicles.size());
+        System.out.println("Available: " + (capacity - parkedVehicles.size()));
+        System.out.println("Parked Vehicles: " + parkedVehicles);
+        System.out.println("----------------------------");
+    }
+}
+
+public class ParkingSystem {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        ParkingLot lot = new ParkingLot(5); // capacity = 5 vehicles
+
+        boolean running = true;
+        while (running) {
+            System.out.println("\n--- Parking Menu ---");
+            System.out.println("1. Park Vehicle");
+            System.out.println("2. Remove Vehicle");
+            System.out.println("3. Status");
+            System.out.println("4. Exit");
+            System.out.print("Choose an option: ");
+            int choice = sc.nextInt();
+            sc.nextLine(); // consume newline
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter vehicle plate number: ");
+                    String plateIn = sc.nextLine();
+                    lot.parkVehicle(plateIn);
+                    break;
+                case 2:
+                    System.out.print("Enter vehicle plate number: ");
+                    String plateOut = sc.nextLine();
+                    lot.removeVehicle(plateOut);
+                    break;
+                case 3:
+                    lot.status();
+                    break;
+                case 4:
+                    running = false;
+                    System.out.println("Exiting Parking System.");
+                    break;
+                default:
+                    System.out.println("Invalid option. Try again.");
+            }
+        }
+
