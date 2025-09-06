@@ -1,0 +1,115 @@
+import java.util.*;
+
+class Student {
+    private String name;
+    private List<Integer> marks;
+
+    public Student(String name) {
+        this.name = name;
+        this.marks = new ArrayList<>();
+    }
+
+    public void addMark(int mark) {
+        if (mark < 0 || mark > 100) {
+            System.out.println("⚠️ Invalid mark! Must be between 0 and 100.");
+            return;
+        }
+        marks.add(mark);
+        System.out.println("✅ Added mark " + mark + " for " + name);
+    }
+
+    public double getAverage() {
+        if (marks.isEmpty()) return 0.0;
+        int total = 0;
+        for (int m : marks) total += m;
+        return total / (double) marks.size();
+    }
+
+    public String getGrade() {
+        double avg = getAverage();
+        if (avg >= 85) return "A";
+        else if (avg >= 70) return "B";
+        else if (avg >= 50) return "C";
+        else return "F";
+    }
+
+    public void report() {
+        System.out.println("\n--- Report for " + name + " ---");
+        System.out.println("Marks: " + marks);
+        System.out.printf("Average: %.2f%n", getAverage());
+        System.out.println("Grade: " + getGrade());
+        System.out.println("-------------------------");
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+
+public class GradeManagementSystem {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        Map<String, Student> students = new HashMap<>();
+        boolean running = true;
+
+        while (running) {
+            System.out.println("\n=== Grade Management Menu ===");
+            System.out.println("1. Add Student");
+            System.out.println("2. Add Mark");
+            System.out.println("3. Show Report");
+            System.out.println("4. Show All Reports");
+            System.out.println("5. Exit");
+            System.out.print("Choose an option: ");
+            int choice = sc.nextInt();
+            sc.nextLine(); // consume newline
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter student name: ");
+                    String sName = sc.nextLine();
+                    if (!students.containsKey(sName)) {
+                        students.put(sName, new Student(sName));
+                        System.out.println("✅ Student " + sName + " added.");
+                    } else {
+                        System.out.println("⚠️ Student already exists!");
+                    }
+                    break;
+                case 2:
+                    System.out.print("Enter student name: ");
+                    String mName = sc.nextLine();
+                    Student stu = students.get(mName);
+                    if (stu != null) {
+                        System.out.print("Enter mark (0-100): ");
+                        int mark = sc.nextInt();
+                        stu.addMark(mark);
+                    } else {
+                        System.out.println("⚠️ Student not found!");
+                    }
+                    break;
+                case 3:
+                    System.out.print("Enter student name: ");
+                    String rName = sc.nextLine();
+                    Student st = students.get(rName);
+                    if (st != null) st.report();
+                    else System.out.println("⚠️ Student not found!");
+                    break;
+                case 4:
+                    if (students.isEmpty()) {
+                        System.out.println("⚠️ No students available.");
+                    } else {
+                        for (Student s : students.values()) {
+                            s.report();
+                        }
+                    }
+                    break;
+                case 5:
+                    running = false;
+                    System.out.println("Exiting Grade Management System.");
+                    break;
+                default:
+                    System.out.println("❌ Invalid choice. Try again.");
+            }
+        }
+        sc.close();
+    }
+}
