@@ -1,0 +1,91 @@
+import java.util.*;
+
+class Student {
+    String name;
+    int rollNo;
+    int attendance;
+
+    Student(String name, int rollNo) {
+        this.name = name;
+        this.rollNo = rollNo;
+        this.attendance = 0;
+    }
+
+    void markPresent() {
+        attendance++;
+    }
+
+    void showDetails() {
+        System.out.println("Roll No: " + rollNo + " | Name: " + name + " | Attendance: " + attendance);
+    }
+}
+
+public class AttendanceSystem {
+    static Scanner sc = new Scanner(System.in);
+    static ArrayList<Student> students = new ArrayList<>();
+
+    // Add student
+    public static void addStudent() {
+        System.out.print("Enter student name: ");
+        String name = sc.nextLine();
+        System.out.print("Enter roll number: ");
+        int rollNo = sc.nextInt();
+        sc.nextLine(); // consume newline
+        students.add(new Student(name, rollNo));
+        System.out.println(" Student added successfully!");
+    }
+
+    // Mark attendance
+    public static void markAttendance() {
+        if (students.isEmpty()) {
+            System.out.println(" No students in the system.");
+            return;
+        }
+        System.out.println("Enter roll number to mark present: ");
+        int roll = sc.nextInt();
+        sc.nextLine();
+        for (Student s : students) {
+            if (s.rollNo == roll) {
+                s.markPresent();
+                System.out.println(" Attendance marked for " + s.name);
+                return;
+            }
+        }
+        System.out.println(" Student not found.");
+    }
+
+    // View attendance report
+    public static void viewReport() {
+        if (students.isEmpty()) {
+            System.out.println(" No students to show.");
+            return;
+        }
+        System.out.println("\n=====  Attendance Report =====");
+        for (Student s : students) {
+            s.showDetails();
+        }
+    }
+
+    // Main menu
+    public static void main(String[] args) {
+        while (true) {
+            System.out.println("\n=====  Attendance System Menu =====");
+            System.out.println("1. Add Student");
+            System.out.println("2. Mark Attendance");
+            System.out.println("3. View Report");
+            System.out.println("4. Exit");
+            System.out.print(" Enter choice: ");
+
+            int choice = sc.nextInt();
+            sc.nextLine();
+
+            switch (choice) {
+                case 1: addStudent(); break;
+                case 2: markAttendance(); break;
+                case 3: viewReport(); break;
+                case 4: System.out.println(" Exiting... Have a great day!"); return;
+                default: System.out.println(" Invalid choice.");
+            }
+        }
+    }
+}
