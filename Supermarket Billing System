@@ -1,0 +1,90 @@
+#Features:
+
+# Add multiple items with price & quantity
+# View items in cart anytime
+# Checkout with a final bill receipt
+# Real-world supermarket use-case
+
+
+
+
+import java.util.*;
+
+class Item {
+    String name;
+    double price;
+    int quantity;
+
+    Item(String name, double price, int quantity) {
+        this.name = name;
+        this.price = price;
+        this.quantity = quantity;
+    }
+
+    double getTotal() {
+        return price * quantity;
+    }
+}
+
+public class SuperMarketBilling {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        List<Item> cart = new ArrayList<>();
+
+        System.out.println("===== 🛒 SUPERMARKET BILLING SYSTEM =====");
+
+        while (true) {
+            System.out.println("\n1. Add Item");
+            System.out.println("2. View Cart");
+            System.out.println("3. Checkout & Exit");
+            System.out.print(" Enter your choice: ");
+            int choice = sc.nextInt();
+            sc.nextLine(); // consume newline
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter Item Name: ");
+                    String name = sc.nextLine();
+                    System.out.print("Enter Price: ");
+                    double price = sc.nextDouble();
+                    System.out.print("Enter Quantity: ");
+                    int qty = sc.nextInt();
+
+                    cart.add(new Item(name, price, qty));
+                    System.out.println(" Item added to cart!");
+                    break;
+
+                case 2:
+                    if (cart.isEmpty()) {
+                        System.out.println("🛒 Cart is empty!");
+                    } else {
+                        System.out.println("\n CART ITEMS ");
+                        double total = 0;
+                        for (Item i : cart) {
+                            System.out.println(i.name + " x " + i.quantity +
+                                    " = ₹" + i.getTotal());
+                            total += i.getTotal();
+                        }
+                        System.out.println("Total Bill: ₹" + total);
+                    }
+                    break;
+
+                case 3:
+                    double finalBill = 0;
+                    System.out.println("\n===== BILL RECEIPT =====");
+                    for (Item i : cart) {
+                        System.out.println(i.name + " x " + i.quantity +
+                                " = ₹" + i.getTotal());
+                        finalBill += i.getTotal();
+                    }
+                    System.out.println("-------------------------");
+                    System.out.println("Total Amount: ₹" + finalBill);
+                    System.out.println(" Thank you for shopping!");
+                    return;
+
+                default:
+                    System.out.println(" Invalid choice! Try again.");
+            }
+        }
+    }
+}
