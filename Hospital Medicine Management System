@@ -1,0 +1,112 @@
+import java.util.*;
+
+class Medicine {
+    String name;
+    int quantity;
+    double price;
+
+    Medicine(String name, int quantity, double price) {
+        this.name = name;
+        this.quantity = quantity;
+        this.price = price;
+    }
+
+    double getTotalValue() {
+        return quantity * price;
+    }
+}
+
+public class HospitalMedicineManagement {
+    private static HashMap<String, Medicine> inventory = new HashMap<>();
+
+    // Add new medicine
+    public static void addMedicine(String name, int qty, double price) {
+        if (inventory.containsKey(name)) {
+            Medicine med = inventory.get(name);
+            med.quantity += qty;
+            System.out.println(" Updated stock of " + name);
+        } else {
+            inventory.put(name, new Medicine(name, qty, price));
+            System.out.println(" Added new medicine: " + name);
+        }
+    }
+
+    // View all medicines
+    public static void viewMedicines() {
+        if (inventory.isEmpty()) {
+            System.out.println(" No medicines available!");
+            return;
+        }
+        System.out.println("\n---  Medicine Inventory ---");
+        for (Medicine med : inventory.values()) {
+            System.out.println(med.name + " | Qty: " + med.quantity +
+                    " | Price: ₹" + med.price + " | Stock Value: ₹" + med.getTotalValue());
+        }
+    }
+
+    // Sell medicine
+    public static void sellMedicine(String name, int qty) {
+        if (!inventory.containsKey(name)) {
+            System.out.println(" Medicine not found!");
+            return;
+        }
+        Medicine med = inventory.get(name);
+        if (med.quantity >= qty) {
+            med.quantity -= qty;
+            double bill = qty * med.price;
+            System.out.println(" Sold " + qty + " units of " + name + ". Bill: ₹" + bill);
+            if (med.quantity == 0) {
+                inventory.remove(name);
+                System.out.println(" Stock of " + name + " is finished!");
+            }
+        } else {
+            System.out.println(" Not enough stock available!");
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("\n=====  HOSPITAL MEDICINE MANAGEMENT =====");
+            System.out.println("1. Add Medicine");
+            System.out.println("2. View Medicines");
+            System.out.println("3. Sell Medicine");
+            System.out.println("4. Exit");
+            System.out.print(" Enter your choice: ");
+            int choice = sc.nextInt();
+            sc.nextLine();
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter Medicine Name: ");
+                    String name = sc.nextLine();
+                    System.out.print("Enter Quantity: ");
+                    int qty = sc.nextInt();
+                    System.out.print("Enter Price per unit: ");
+                    double price = sc.nextDouble();
+                    addMedicine(name, qty, price);
+                    break;
+
+                case 2:
+                    viewMedicines();
+                    break;
+
+                case 3:
+                    System.out.print("Enter Medicine Name to Sell: ");
+                    String sellName = sc.nextLine();
+                    System.out.print("Enter Quantity: ");
+                    int sellQty = sc.nextInt();
+                    sellMedicine(sellName, sellQty);
+                    break;
+
+                case 4:
+                    System.out.println(" Exiting... Stay Healthy!");
+                    return;
+
+                default:
+                    System.out.println(" Invalid choice!");
+            }
+        }
+    }
+}
