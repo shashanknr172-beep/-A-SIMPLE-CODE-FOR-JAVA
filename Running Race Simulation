@@ -1,0 +1,45 @@
+import java.util.Random;
+
+class Runner extends Thread {
+    private String name;
+    private int distance = 0;
+    private static final int FINISH_LINE = 100;
+    private static boolean raceOver = false;
+
+    public Runner(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void run() {
+        Random rand = new Random();
+        while (distance < FINISH_LINE && !raceOver) {
+            try {
+                int step = rand.nextInt(10) + 1; // move 1–10 units
+                distance += step;
+                System.out.println(name + " ran " + step + " units (Total: " + distance + ")");
+                Thread.sleep(rand.nextInt(300)); // rest a bit
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        if (!raceOver) {
+            raceOver = true;
+            System.out.println(" " + name + " wins the race!");
+        }
+    }
+}
+
+public class RunningRace {
+    public static void main(String[] args) {
+        System.out.println("=====  RUNNING RACE START =====");
+
+        Runner r1 = new Runner("Runner 1");
+        Runner r2 = new Runner("Runner 2");
+        Runner r3 = new Runner("Runner 3");
+
+        r1.start();
+        r2.start();
+        r3.start();
+    }
+}
