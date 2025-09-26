@@ -1,0 +1,96 @@
+import java.util.*;
+
+class Athlete extends Thread {
+    private String name;
+    private int distance = 0;
+    private static final int FINISH_LINE = 100;
+    private static boolean raceOver = false;
+    private static List<String> results = Collections.synchronizedList(new ArrayList<>());
+    private Random rand = new Random();
+
+    public Athlete(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void run() {
+        while (distance < FINISH_LINE && !raceOver) {
+            try {
+                int step = rand.nextInt(10) + 1; // move 1–10 units
+                distance += step;
+                System.out.println(name + " ran " + step + "m (Total: " + distance + "m)");
+                Thread.sleep(rand.nextInt(300)); // rest
+
+                if (distance >= FINISH_LINE) {
+                    synchronized (results) {
+                        results.add(name);
+                        if (results.size() == 1) {
+                            System.out.println("cup " + name + " finishes FIRST!");
+                        } else {
+                            System.out.println("right " + name + " finished at position " + results.size());
+                        }
+                        if (results.size() == OlympicsRace.totalAthletes) {
+                            raceOver = true; // stop race once all finish
+                        }
+                    }
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static List<String> getResults() {
+        return results;
+    }
+}
+
+public class OlympicsRace {
+    public static int totalAthletes;
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("===== OLYMPICS RUNNING RACE SIMULATION =====");
+        System.out.print("Enter number of athletes: ");
+        totalAthletes = sc.nextInt();
+        sc.nextLine();
+
+        Athlete[] athletes = new Athlete[totalAthletes];
+        for (int i = 0; i < totalAthletes; i++) {
+            System.out.print("Enter Athlete " + (i + 1) + " Name: ");
+            String name = sc.nextLine();
+            athletes[i] = new Athlete(name);
+        }
+
+        System.out.println("\n Race Starts! Athletes are running...\n");
+
+        for (Athlete a : athletes) {
+            a.start();
+        }
+
+        // Wait for all athletes to finish
+        for (Athlete a : athletes) {
+            try {
+                a.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Final Scoreboard
+        System.out.println("\n=====  FINAL SCOREBOARD =====");
+        List<String> results = Athlete.getResults();
+        for (int i = 0; i < results.size(); i++) {
+            if (i == 0) {
+                System.out.println((i + 1) + ". " + results.get(i) + "  Gold Medal");
+            } else if (i == 1) {
+                System.out.println((i + 1) + ". " + results.get(i) + "  Silver Medal");
+            } else if (i == 2) {
+                System.out.println((i + 1) + ". " + results.get(i) + "  Bronze Medal");
+            } else {
+                System.out.println((i + 1) + ". " + results.get(i));
+            }
+        }
+        System.out.println("========");
+    }
+}
