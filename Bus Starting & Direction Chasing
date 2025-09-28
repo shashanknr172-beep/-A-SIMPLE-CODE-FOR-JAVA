@@ -1,0 +1,115 @@
+#Features
+#Stores a list of bus stops in a route.
+#Lets user choose a starting bus stop.
+#Moves bus forward or backward along the route.
+#Displays the current stop at any time.
+#Prevents moving past start or end.
+
+import java.util.*;
+
+class BusRoute {
+    private List<String> stops;
+    private int currentIndex;
+
+    public BusRoute() {
+        stops = new ArrayList<>();
+        currentIndex = 0;
+    }
+
+    // Add bus stop
+    public void addStop(String stop) {
+        stops.add(stop);
+    }
+
+    // Set starting bus stop
+    public boolean setStartingStop(String stop) {
+        int index = stops.indexOf(stop);
+        if (index != -1) {
+            currentIndex = index;
+            return true;
+        }
+        return false;
+    }
+
+    // Move bus forward
+    public void moveForward() {
+        if (currentIndex < stops.size() - 1) {
+            currentIndex++;
+            System.out.println(" Bus moved forward to: " + stops.get(currentIndex));
+        } else {
+            System.out.println(" End of route reached.");
+        }
+    }
+
+    // Move bus backward
+    public void moveBackward() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            System.out.println(" Bus moved backward to: " + stops.get(currentIndex));
+        } else {
+            System.out.println(" Start of route reached.");
+        }
+    }
+
+    // Show current location
+    public void showCurrentStop() {
+        System.out.println(" Current Bus Location: " + stops.get(currentIndex));
+    }
+
+    // Show all stops
+    public void showRoute() {
+        System.out.println("\n=====  BUS ROUTE =====");
+        for (int i = 0; i < stops.size(); i++) {
+            System.out.println((i + 1) + ". " + stops.get(i));
+        }
+    }
+}
+
+public class BusDirectionChasing {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        BusRoute bus = new BusRoute();
+
+        // Sample Route
+        bus.addStop("Central Station");
+        bus.addStop("Market Square");
+        bus.addStop("City Mall");
+        bus.addStop("Tech Park");
+        bus.addStop("Airport");
+
+        bus.showRoute();
+
+        System.out.print("\n Enter Starting Stop: ");
+        String start = sc.nextLine();
+
+        if (!bus.setStartingStop(start)) {
+            System.out.println(" Stop not found. Defaulting to Central Station.");
+            bus.setStartingStop("Central Station");
+        }
+
+        bus.showCurrentStop();
+
+        while (true) {
+            System.out.println("\n===== BUS MENU =====");
+            System.out.println("1. Move Forward");
+            System.out.println("2. Move Backward");
+            System.out.println("3. Show Current Stop");
+            System.out.println("4. Exit");
+            System.out.print(" Enter choice: ");
+            int choice = sc.nextInt();
+            sc.nextLine(); // clear buffer
+
+            switch (choice) {
+                case 1 -> bus.moveForward();
+                case 2 -> bus.moveBackward();
+                case 3 -> bus.showCurrentStop();
+                case 4 -> {
+                    System.out.println(" Exiting Bus System...");
+                    return;
+                }
+                default -> System.out.println("Invalid choice!");
+            }
+        }
+    }
+}
