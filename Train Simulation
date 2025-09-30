@@ -1,0 +1,129 @@
+import java.util.*;
+
+class Train {
+    private List<String> stations;
+    private int currentIndex;
+    private String status;
+    private Random random;
+
+    public Train() {
+        stations = new ArrayList<>();
+        currentIndex = 0;
+        status = "At Station";
+        random = new Random();
+    }
+
+    // Add stations to the route
+    public void addStation(String station) {
+        stations.add(station);
+    }
+
+    // Set starting station
+    public boolean setStartingStation(String station) {
+        int index = stations.indexOf(station);
+        if (index != -1) {
+            currentIndex = index;
+            status = "At Station";
+            return true;
+        }
+        return false;
+    }
+
+    // Move train forward
+    public void moveForward() {
+        if (currentIndex < stations.size() - 1) {
+            currentIndex++;
+            simulateEvent();
+            System.out.println(" Train moved forward to: " + stations.get(currentIndex));
+        } else {
+            System.out.println(" End of route reached.");
+        }
+    }
+
+    // Move train backward
+    public void moveBackward() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            simulateEvent();
+            System.out.println(" Train moved backward to: " + stations.get(currentIndex));
+        } else {
+            System.out.println(" Start of route reached.");
+        }
+    }
+
+    // Random event simulation
+    private void simulateEvent() {
+        int event = random.nextInt(100);
+        if (event < 20) {
+            status = "Signal Stop";
+            System.out.println(" Train delayed due to signal stop!");
+        } else if (event < 30) {
+            status = "Maintenance Delay";
+            System.out.println("Train stopped for quick maintenance!");
+        } else {
+            status = "Running Smoothly";
+        }
+    }
+
+    // Show current location
+    public void showCurrentStation() {
+        System.out.println(" Current Train Location: " + stations.get(currentIndex) + " (" + status + ")");
+    }
+
+    // Show full route
+    public void showRoute() {
+        System.out.println("\n=====  TRAIN ROUTE =====");
+        for (int i = 0; i < stations.size(); i++) {
+            System.out.println((i + 1) + ". " + stations.get(i));
+        }
+    }
+}
+
+public class TrainSimulation {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        Train train = new Train();
+
+        // Adding sample route
+        train.addStation("Central Station");
+        train.addStation("Park Street");
+        train.addStation("Grand Market");
+        train.addStation("Tech Hub");
+        train.addStation("Airport Terminal");
+
+        train.showRoute();
+
+        System.out.print("\n Enter Starting Station: ");
+        String start = sc.nextLine();
+
+        if (!train.setStartingStation(start)) {
+            System.out.println(" Station not found. Defaulting to Central Station.");
+            train.setStartingStation("Central Station");
+        }
+
+        train.showCurrentStation();
+
+        while (true) {
+            System.out.println("\n===== TRAIN MENU =====");
+            System.out.println("1. Move Forward");
+            System.out.println("2. Move Backward");
+            System.out.println("3. Show Current Station");
+            System.out.println("4. Exit");
+            System.out.print(" Enter choice: ");
+            int choice = sc.nextInt();
+            sc.nextLine();
+
+            switch (choice) {
+                case 1 -> train.moveForward();
+                case 2 -> train.moveBackward();
+                case 3 -> train.showCurrentStation();
+                case 4 -> {
+                    System.out.println(" Exiting Train Simulation...");
+                    return;
+                }
+                default -> System.out.println(" Invalid choice!");
+            }
+        }
+    }
+}
