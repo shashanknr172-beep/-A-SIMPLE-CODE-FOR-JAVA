@@ -1,0 +1,134 @@
+#Store infrastructure projects (like Metro, Roads, Parks, IT Parks, etc.)
+#Allow user to:
+#Add new development projects
+#View all projects
+#Search project by category
+#Check total budget spent on development
+
+
+import java.util.*;
+
+class Project {
+    String name;
+    String category;
+    double budget;
+    String status;
+
+    public Project(String name, String category, double budget, String status) {
+        this.name = name;
+        this.category = category;
+        this.budget = budget;
+        this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return " Project: " + name + " | Category: " + category + 
+               " | Budget: ₹" + budget + " Cr | Status: " + status;
+    }
+}
+
+class BangaloreCityDevelopment {
+    private List<Project> projects;
+
+    public BangaloreCityDevelopment() {
+        projects = new ArrayList<>();
+    }
+
+    // Add new project
+    public void addProject(String name, String category, double budget, String status) {
+        projects.add(new Project(name, category, budget, status));
+        System.out.println(" Project added successfully!");
+    }
+
+    // Show all projects
+    public void showProjects() {
+        if (projects.isEmpty()) {
+            System.out.println(" No projects available.");
+            return;
+        }
+        System.out.println("\n=====  Bangalore Development Projects =====");
+        for (Project p : projects) {
+            System.out.println(p);
+        }
+    }
+
+    // Search project by category
+    public void searchByCategory(String category) {
+        boolean found = false;
+        System.out.println("\n Projects under category: " + category);
+        for (Project p : projects) {
+            if (p.category.equalsIgnoreCase(category)) {
+                System.out.println(p);
+                found = true;
+            }
+        }
+        if (!found) {
+            System.out.println(" No projects found in this category.");
+        }
+    }
+
+    // Calculate total budget
+    public void totalBudget() {
+        double total = 0;
+        for (Project p : projects) {
+            total += p.budget;
+        }
+        System.out.println("\n Total Budget Spent: ₹" + total + " Cr");
+    }
+}
+
+public class CityDevelopmentSystem {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        BangaloreCityDevelopment city = new BangaloreCityDevelopment();
+
+        // Pre-added sample projects
+        city.addProject("Namma Metro Phase 2", "Transport", 15000, "Ongoing");
+        city.addProject("Outer Ring Road Expansion", "Roads", 5000, "Planned");
+        city.addProject("Cubbon Park Renovation", "Parks", 300, "Completed");
+        city.addProject("Electronics City IT Park", "Technology", 12000, "Ongoing");
+
+        while (true) {
+            System.out.println("\n=====  Bangalore City Development Menu =====");
+            System.out.println("1. Show All Projects");
+            System.out.println("2. Add New Project");
+            System.out.println("3. Search Project by Category");
+            System.out.println("4. Show Total Budget");
+            System.out.println("5. Exit");
+            System.out.print(" Enter choice: ");
+            int choice = sc.nextInt();
+            sc.nextLine(); // clear buffer
+
+            switch (choice) {
+                case 1 -> city.showProjects();
+                case 2 -> {
+                    System.out.print("Enter Project Name: ");
+                    String name = sc.nextLine();
+                    System.out.print("Enter Category (Transport/Roads/Parks/Technology/etc): ");
+                    String category = sc.nextLine();
+                    System.out.print("Enter Budget (in Cr): ");
+                    double budget = sc.nextDouble();
+                    sc.nextLine();
+                    System.out.print("Enter Status (Planned/Ongoing/Completed): ");
+                    String status = sc.nextLine();
+                    city.addProject(name, category, budget, status);
+                }
+                case 3 -> {
+                    System.out.print("Enter category to search: ");
+                    String category = sc.nextLine();
+                    city.searchByCategory(category);
+                }
+                case 4 -> city.totalBudget();
+                case 5 -> {
+                    System.out.println(" Exiting Bangalore City Development System...");
+                    return;
+                }
+                default -> System.out.println(" Invalid choice! Try again.");
+            }
+        }
+    }
+}
+
+
+
