@@ -1,0 +1,115 @@
+import java.util.*;
+
+class Destination {
+    String name;
+    String location;
+    double entryFee;
+    int visitors;
+    double rating;
+
+    public Destination(String name, String location, double entryFee, int visitors, double rating) {
+        this.name = name;
+        this.location = location;
+        this.entryFee = entryFee;
+        this.visitors = visitors;
+        this.rating = rating;
+    }
+
+    public void addVisitors(int count) {
+        this.visitors += count;
+    }
+
+    public void updateRating(double newRating) {
+        this.rating = (this.rating + newRating) / 2;
+    }
+
+    @Override
+    public String toString() {
+        return "! " + name + " (" + location + ")" +
+               " | Entry Fee: ₹" + entryFee +
+               " | Visitors: " + visitors +
+               " | Rating: " + String.format("%.1f", rating) + "star";
+    }
+}
+
+class TourismMonitoring {
+    private List<Destination> destinations;
+
+    public TourismMonitoring() {
+        destinations = new ArrayList<>();
+    }
+
+    // Add new tourist spot
+    public void addDestination(String name, String location, double entryFee, int visitors, double rating) {
+        destinations.add(new Destination(name, location, entryFee, visitors, rating));
+        System.out.println(" Destination added successfully!");
+    }
+
+    // Show all destinations
+    public void showAllDestinations() {
+        if (destinations.isEmpty()) {
+            System.out.println(" No destinations available.");
+            return;
+        }
+        System.out.println("\n=====  TOURISM DESTINATIONS =====");
+        for (Destination d : destinations) {
+            System.out.println(d);
+        }
+    }
+
+    // Search destination by location
+    public void searchByLocation(String location) {
+        boolean found = false;
+        System.out.println("\n Destinations in " + location + ":");
+        for (Destination d : destinations) {
+            if (d.location.equalsIgnoreCase(location)) {
+                System.out.println(d);
+                found = true;
+            }
+        }
+        if (!found) System.out.println(" No destinations found in this location.");
+    }
+
+    // Update tourist count
+    public void updateVisitors(String name, int count) {
+        for (Destination d : destinations) {
+            if (d.name.equalsIgnoreCase(name)) {
+                d.addVisitors(count);
+                System.out.println(" Updated visitor count for " + d.name);
+                return;
+            }
+        }
+        System.out.println(" Destination not found.");
+    }
+
+    // Update rating
+    public void updateRating(String name, double rating) {
+        for (Destination d : destinations) {
+            if (d.name.equalsIgnoreCase(name)) {
+                d.updateRating(rating);
+                System.out.println(" Rating updated for " + d.name);
+                return;
+            }
+        }
+        System.out.println(" Destination not found.");
+    }
+
+    // Show total visitors
+    public void showTotalVisitors() {
+        int total = 0;
+        for (Destination d : destinations) {
+            total += d.visitors;
+        }
+        System.out.println("\n Total Visitors Across All Destinations: " + total);
+    }
+}
+
+public class TourismMonitoringSystem {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        TourismMonitoring tourism = new TourismMonitoring();
+
+        // Pre-added destinations
+        tourism.addDestination("Lalbagh Botanical Garden", "Bangalore", 50, 1200, 4.5);
+        tourism.addDestination("Mysore Palace", "Mysore", 70, 2000, 4.8);
+        tourism.addDestinatio
