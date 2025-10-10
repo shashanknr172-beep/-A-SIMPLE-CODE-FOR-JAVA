@@ -1,0 +1,578 @@
+import java.io.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.concurrent.*;
+
+/**
+ * SmartHomeAutomation.java
+ *
+ * A compact but feature-rich Smart Home Automation simulation in Java.
+ *
+ * Features:
+ * - Device models: Light, Thermostat, DoorLock, Camera
+ * - Sensors: MotionSensor, TemperatureSensor (simulated)
+ * - Scenes (grouped device states)
+ * - Scheduler for timed actions
+ * - Rule-based automation engine (simple IF -> DO)
+ * - Energy Manager (energy-saving mode, reports)
+ * - Persistence (save/load system state to file)
+ * - CLI for interaction
+ *
+ * Note: This is a simulation — replace simulated sensors and actions with real hardware APIs for actual deployment.
+ */
+public class SmartHomeAutomation {
+
+    // -------
+    // Interfaces & Base Types
+    // -----
+    interface Device extends Serializable {
+        String getId();
+        String getType();
+        String getStatus();
+        void applyState(Map<String, Object> state);
+        Map<String, Object> getState();
+    }
+
+    static abstract class BaseDevice implements Device {
+        protected String id;
+        protected String name;
+
+        BaseDevice(String id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public String getId() { return id; }
+        public String getName() { return name; }
+        public String toString() { return String.format("%s (%s) - %s", name, id, getStatus()); }
+    }
+
+    // ----
+    // Device Models
+    // -------
+    static class Light extends BaseDevice {
+        private boolean on;
+        private int brightness; // 0-100
+        private String color; // e.g., "warm", "cool", "#RRGGBB"
+
+        Light(String id, String name) { super(id, name); this.on = false; this.brightness = 100; this.color = "warm"; }
+
+        public String getType() { return "Light"; }
+        public String getStatus() { return on ? "ON" : "OFF"; }
+
+        public void setOn(boolean on) { this.on = on; }
+        public void setBrightness(int b) { brightness = Math.max(0, Math.min(100, b)); }
+        public void setColor(String c) { color = c; }
+
+        public void applyState(Map<String, Object> state) {
+            if (state.containsKey("on")) setOn((Boolean) state.get("on"));
+            if (state.containsKey("brightness")) setBrightness((Integer) state.get("brightness"));
+            if (state.containsKey("color")) setColor((String) state.get("color"));
+        }
+
+        public Map<String, Object> getState() {
+            Map<String,Object> s = new HashMap<>();
+            s.put("on", on);
+            s.put("brightness", brightness);
+            s.put("color", color);
+            return s;
+        }
+    }
+
+    static class Thermostat extends BaseDevice {
+        private double setPoint; // degrees Celsius
+        private double currentTemp; // simulated
+        private boolean heating; // on/off
+
+        Thermostat(String id, String name, double initial) {
+            super(id, name);
+            this.setPoint = initial;
+            this.currentTemp = initial;
+            this.heating = false;
+        }
+
+        public String getType() { return "Thermostat"; }
+        public String getStatus() { return String.format("Set: %.1f°C Current: %.1f°C %s",
+                setPoint, currentTemp, heating ? "(Heating)" : ""); }
+
+        public void setSetPoint(double p) { setPoint = p; }
+        public void setCurrentTemp(double t) { currentTemp = t; heating = currentTemp < setPoint; }
+
+        public void applyState(Map<String, Object> state) {
+            if (state.containsKey("setPoint")) setSetPoint((Double) state.get("setPoint"));
+        }
+
+        public Map<String, Object> getState() {
+            Map<String,Object> s = new HashMap<>();
+            s.put("setPoint", setPoint);
+            s.put("currentTemp", currentTemp);
+            s.put("heating", heating);
+            return s;
+        }
+    }
+
+    static class DoorLock extends BaseDevice {
+        private boolean locked;
+
+        DoorLock(String id, String name) { super(id, name); this.locked = true; }
+
+        public String getType() { return "DoorLock"; }
+        public String getStatus() { return locked ? "LOCKED" : "UNLOCKED"; }
+
+        public void setLocked(boolean l) { locked = l; }
+
+        public void applyState(Map<String, Object> state) {
+            if (state.containsKey("locked")) setLocked((Boolean) state.get("locked"));
+        }
+
+        public Map<String, Object> getState() {
+            Map<String,Object> s = new HashMap<>();
+            s.put("locked", locked);
+            return s;
+        }
+    }
+
+    static class Camera extends BaseDevice {
+        private boolean recording;
+        private boolean motionAlert;
+
+        Camera(String id, String name) { super(id, name); recording = false; motionAlert = true; }
+
+        public String getType() { return "Camera"; }
+        public String getStatus() { return recording ? "RECORDING" : "IDLE"; }
+
+        public void setRecording(boolean r) { recording = r; }
+        public void setMotionAlert(boolean a) { motionAlert = a; }
+
+        public void applyState(Map<String, Object> state) {
+            if (state.containsKey("recording")) setRecording((Boolean) state.get("recording"));
+            if (state.containsKey("motionAlert")) setMotionAlert((Boolean) state.get("motionAlert"));
+        }
+
+        public Map<String, Object> getState() {
+            Map<String,Object> s = new HashMap<>();
+            s.put("recording", recording);
+            s.put("motionAlert", motionAlert);
+            return s;
+        }
+    }
+
+    // -------
+    // Sensors
+    // ---
+    static abstract class Sensor implements Serializable {
+        String id;
+        String name;
+        Sensor(String id, String name) { this.id = id; this.name = name; }
+        abstract Object read();
+        public String toString() { return name + " (" + id + ")"; }
+    }
+
+    static class MotionSensor extends Sensor {
+        private transient Random rand = new Random();
+        MotionSensor(String id, String name) { super(id, name); }
+        public Boolean read() { if (rand==null) rand=new Random(); return rand.nextInt(100) < 10; } // 10% chance
+    }
+
+    static class TemperatureSensor extends Sensor {
+        private transient Random rand = new Random();
+        private double base;
+        TemperatureSensor(String id, String name, double base) { super(id, name); this.base = base; }
+        public Double read() { if (rand==null) rand=new Random(); return base + rand.nextGaussian()*1.5; }
+    }
+
+    // ------
+    // Scenes & Schedules
+    // -----
+    static class Scene implements Serializable {
+        String name;
+        Map<String, Map<String,Object>> deviceStates = new HashMap<>();
+        Scene(String name) { this.name = name; }
+        void addDeviceState(String deviceId, Map<String,Object> state) { deviceStates.put(deviceId, state); }
+        public String toString() { return "Scene: " + name + " Devices: " + deviceStates.keySet(); }
+    }
+
+    static class ScheduledTask implements Serializable {
+        LocalDateTime executeAt;
+        String action; // "scene:NAME" or "device:ID:jsonstate"
+        ScheduledTask(LocalDateTime t, String a) { this.executeAt = t; this.action = a; }
+    }
+
+    // --
+    // Automation Engine
+    // -----------
+    static class AutomationEngine implements Serializable {
+        private transient SmartHomeAutomation system;
+        private List<Rule> rules = new ArrayList<>();
+
+        AutomationEngine(SmartHomeAutomation system) { this.system = system; }
+
+        void setSystem(SmartHomeAutomation s) { this.system = s; } // used after loading
+
+        void addRule(Rule r) { rules.add(r); }
+        void checkAndFire() {
+            for (Rule r : rules) {
+                if (r.evaluate(system)) {
+                    r.execute(system);
+                }
+            }
+        }
+
+        public String toString() { return "AutomationEngine with " + rules.size() + " rules"; }
+    }
+
+    static abstract class Rule implements Serializable {
+        String name;
+        Rule(String name) { this.name = name; }
+        abstract boolean evaluate(SmartHomeAutomation system);
+        abstract void execute(SmartHomeAutomation system);
+        public String toString() { return "Rule: " + name; }
+    }
+
+    // Example Rule: If motion detected at night -> turn on specified lights
+    static class MotionNightRule extends Rule {
+        String sensorId;
+        List<String> lights;
+        int nightStartHour, nightEndHour;
+        boolean triggered = false;
+
+        MotionNightRule(String name, String sensorId, List<String> lights, int nightStartHour, int nightEndHour) {
+            super(name);
+            this.sensorId = sensorId;
+            this.lights = lights;
+            this.nightStartHour = nightStartHour;
+            this.nightEndHour = nightEndHour;
+        }
+
+        boolean isNight() {
+            int h = LocalDateTime.now().getHour();
+            if (nightStartHour <= nightEndHour) return h >= nightStartHour && h < nightEndHour;
+            else return h >= nightStartHour || h < nightEndHour;
+        }
+
+        boolean evaluate(SmartHomeAutomation system) {
+            Sensor s = system.sensors.get(sensorId);
+            if (s instanceof MotionSensor) {
+                boolean motion = (Boolean) s.read();
+                return motion && isNight();
+            }
+            return false;
+        }
+
+        void execute(SmartHomeAutomation system) {
+            for (String id : lights) {
+                Device d = system.devices.get(id);
+                if (d instanceof Light) {
+                    Map<String,Object> state = new HashMap<>();
+                    state.put("on", true);
+                    state.put("brightness", 80);
+                    d.applyState(state);
+                    System.out.println("[Automation] Rule '" + name + "' turned on " + d.getName());
+                }
+            }
+        }
+    }
+
+    // -----
+    // Energy Management
+    // ----------
+    static class EnergyManager implements Serializable {
+        boolean energySaving = false;
+
+        void setEnergySaving(boolean v) { energySaving = v; System.out.println("Energy Saving Mode: " + (v ? "ON" : "OFF")); }
+        boolean isEnergySaving() { return energySaving; }
+
+        void applyEnergyPolicy(SmartHomeAutomation system) {
+            if (energySaving) {
+                for (Device d : system.devices.values()) {
+                    if (d instanceof Light) {
+                        Map<String,Object> s = new HashMap<>();
+                        s.put("brightness", 40);
+                        d.applyState(s);
+                    } else if (d instanceof Thermostat) {
+                        Thermostat t = (Thermostat) d;
+                        Map<String,Object> st = new HashMap<>();
+                        st.put("setPoint", 24.0); // modest temp to save energy
+                        d.applyState(st);
+                    }
+                }
+                System.out.println("[EnergyManager] Applied energy-saving policies.");
+            }
+        }
+    }
+
+    // ---------------------
+    // Persistence Utilities
+    // ---------------------
+    static class Persistence {
+        static final String FILENAME = "smarthome_state.dat";
+
+        static void save(SmartHomeAutomation system) {
+            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILENAME))) {
+                oos.writeObject(system);
+                System.out.println("[Persistence] System saved to " + FILENAME);
+            } catch (Exception e) {
+                System.out.println("[Persistence] Error saving: " + e.getMessage());
+            }
+        }
+
+        static SmartHomeAutomation load() {
+            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILENAME))) {
+                SmartHomeAutomation sys = (SmartHomeAutomation) ois.readObject();
+                // reinitialize transient parts
+                sys.postLoadInit();
+                System.out.println("[Persistence] System loaded from " + FILENAME);
+                return sys;
+            } catch (Exception e) {
+                System.out.println("[Persistence] No saved state found, starting new system.");
+                return null;
+            }
+        }
+    }
+
+    // ---------------
+    // Smart Home System
+    // ---------------
+    Map<String, Device> devices = new HashMap<>();
+    Map<String, Sensor> sensors = new HashMap<>();
+    Map<String, Scene> scenes = new HashMap<>();
+    List<ScheduledTask> schedule = new ArrayList<>();
+    transient ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    AutomationEngine engine;
+    EnergyManager energyManager = new EnergyManager();
+
+    SmartHomeAutomation() {
+        engine = new AutomationEngine(this);
+        postLoadInit();
+    }
+
+    void postLoadInit() {
+        if (scheduler == null || scheduler.isShutdown()) {
+            scheduler = Executors.newSingleThreadScheduledExecutor();
+        }
+        if (engine == null) engine = new AutomationEngine(this);
+        engine.setSystem(this);
+        // re-create transient fields in sensors if needed
+        for (Sensor s : sensors.values()) {
+            // no-op: transient Randoms get recreated inside sensor read if null
+        }
+        startBackgroundTasks();
+    }
+
+    void startBackgroundTasks() {
+        // Scheduler worker checks scheduled tasks and automation rules periodically
+        scheduler.scheduleAtFixedRate(() -> {
+            try {
+                // check scheduled tasks
+                checkSchedule();
+                // automation rules
+                engine.checkAndFire();
+                // apply energy policy if enabled
+                energyManager.applyEnergyPolicy(this);
+            } catch (Exception e) {
+                System.out.println("[Background] Error: " + e.getMessage());
+            }
+        }, 2, 2, TimeUnit.SECONDS);
+    }
+
+    // ----------------
+    // System Utilities
+    // ----------------
+    void addDevice(Device d) { devices.put(d.getId(), d); }
+    void addSensor(Sensor s) { sensors.put(s.id, s); }
+
+    void showDevices() {
+        System.out.println("\n--- Devices ---");
+        for (Device d : devices.values()) {
+            System.out.println(d.getType() + " | " + d);
+            System.out.println("   State: " + d.getState());
+        }
+    }
+
+    void showSensors() {
+        System.out.println("\n--- Sensors ---");
+        for (Sensor s : sensors.values()) {
+            System.out.println(s + " => " + s.read());
+        }
+    }
+
+    void createScene(String name) {
+        Scene sc = new Scene(name);
+        for (Device d : devices.values()) sc.addDeviceState(d.getId(), d.getState());
+        scenes.put(name, sc);
+        System.out.println("Scene '" + name + "' created from current state.");
+    }
+
+    void activateScene(String name) {
+        Scene sc = scenes.get(name);
+        if (sc == null) { System.out.println("Scene not found."); return; }
+        for (String id : sc.deviceStates.keySet()) {
+            Device d = devices.get(id);
+            if (d != null) d.applyState(sc.deviceStates.get(id));
+        }
+        System.out.println("Scene '" + name + "' activated.");
+    }
+
+    void scheduleScene(LocalDateTime t, String sceneName) {
+        schedule.add(new ScheduledTask(t, "scene:" + sceneName));
+        System.out.println("Scheduled scene '" + sceneName + "' at " + t.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+    }
+
+    void checkSchedule() {
+        LocalDateTime now = LocalDateTime.now();
+        Iterator<ScheduledTask> it = schedule.iterator();
+        while (it.hasNext()) {
+            ScheduledTask st = it.next();
+            if (!st.executeAt.isAfter(now)) {
+                executeScheduledAction(st.action);
+                it.remove();
+            }
+        }
+    }
+
+    void executeScheduledAction(String action) {
+        if (action.startsWith("scene:")) {
+            String sName = action.substring("scene:".length());
+            activateScene(sName);
+        } else {
+            System.out.println("[Scheduler] Unknown action: " + action);
+        }
+    }
+
+    void addRule(Rule r) { engine.addRule(r); }
+
+    void toggleEnergySaving(boolean v) { energyManager.setEnergySaving(v); }
+
+    // ----------------------
+    // Simple CLI (Main)
+    // ----------------------
+    public static void main(String[] args) throws Exception {
+        SmartHomeAutomation system = Persistence.load();
+        if (system == null) system = new SmartHomeAutomation();
+
+        // Prepopulate sample devices if empty
+        if (system.devices.isEmpty()) {
+            system.addDevice(new Light("L1","Living Room Light"));
+            system.addDevice(new Light("L2","Porch Light"));
+            system.addDevice(new Thermostat("T1","Main Thermostat", 22.0));
+            system.addDevice(new DoorLock("D1","Front Door"));
+            system.addDevice(new Camera("C1","Porch Camera"));
+
+            system.addSensor(new MotionSensor("S1","Porch Motion"));
+            system.addSensor(new TemperatureSensor("TS1","Indoor Temp Sensor",22.0));
+
+            // add automation rule: when motion at porch at night -> porch light ON
+            List<String> lights = Arrays.asList("L2");
+            system.addRule(new MotionNightRule("PorchMotionNight", "S1", lights, 19, 6)); // 19:00 -> 06:00 night
+        }
+
+        Scanner sc = new Scanner(System.in);
+        while (true) {
+            System.out.println("\n===== SMART HOME AUTOMATION MENU =====");
+            System.out.println("1. Show Devices");
+            System.out.println("2. Show Sensors");
+            System.out.println("3. Toggle Device (Light/Door/Camera)");
+            System.out.println("4. Set Thermostat SetPoint");
+            System.out.println("5. Create Scene (from current state)");
+            System.out.println("6. Activate Scene");
+            System.out.println("7. Schedule Scene");
+            System.out.println("8. Toggle Energy Saving Mode");
+            System.out.println("9. Add Rule (Motion->Lights)");
+            System.out.println("10. Save System");
+            System.out.println("11. Exit");
+            System.out.print("Enter choice: ");
+            String choice = sc.nextLine().trim();
+
+            switch (choice) {
+                case "1": system.showDevices(); break;
+                case "2": system.showSensors(); break;
+                case "3": {
+                    System.out.print("Enter device id: ");
+                    String id = sc.nextLine().trim();
+                    Device d = system.devices.get(id);
+                    if (d==null) { System.out.println("Device not found"); break; }
+                    if (d instanceof Light) {
+                        Light l = (Light)d;
+                        Map<String,Object> s = new HashMap<>();
+                        s.put("on", !(Boolean)l.getState().get("on"));
+                        l.applyState(s);
+                        System.out.println("Toggled light: " + l.getName() + " -> " + l.getStatus());
+                    } else if (d instanceof DoorLock) {
+                        DoorLock dl = (DoorLock)d;
+                        Map<String,Object> s = new HashMap<>();
+                        s.put("locked", !(Boolean)dl.getState().get("locked"));
+                        dl.applyState(s);
+                        System.out.println("Toggled lock: " + dl.getName() + " -> " + dl.getStatus());
+                    } else if (d instanceof Camera) {
+                        Camera c = (Camera)d;
+                        Map<String,Object> s = new HashMap<>();
+                        s.put("recording", !(Boolean)c.getState().get("recording"));
+                        c.applyState(s);
+                        System.out.println("Toggled camera recording: " + c.getName() + " -> " + c.getStatus());
+                    } else System.out.println("Toggle not supported for this device.");
+                    break;
+                }
+                case "4": {
+                    System.out.print("Enter thermostat id: ");
+                    String id = sc.nextLine().trim();
+                    Device d = system.devices.get(id);
+                    if (d instanceof Thermostat) {
+                        System.out.print("Enter setpoint (°C): ");
+                        double p = Double.parseDouble(sc.nextLine().trim());
+                        Map<String,Object> s = new HashMap<>();
+                        s.put("setPoint", p);
+                        d.applyState(s);
+                        System.out.println("Setpoint updated.");
+                    } else System.out.println("Thermostat not found.");
+                    break;
+                }
+                case "5": {
+                    System.out.print("Enter scene name: ");
+                    String name = sc.nextLine().trim();
+                    system.createScene(name);
+                    break;
+                }
+                case "6": {
+                    System.out.print("Enter scene name to activate: ");
+                    String name = sc.nextLine().trim();
+                    system.activateScene(name);
+                    break;
+                }
+                case "7": {
+                    System.out.print("Enter scene name to schedule: ");
+                    String name = sc.nextLine().trim();
+                    System.out.print("Enter execution time (YYYY-MM-DDTHH:MM): ");
+                    String timestr = sc.nextLine().trim();
+                    LocalDateTime t = LocalDateTime.parse(timestr);
+                    system.scheduleScene(t, name);
+                    break;
+                }
+                case "8": {
+                    System.out.print("Enable energy saving mode? (yes/no): ");
+                    String yn = sc.nextLine().trim().toLowerCase();
+                    system.toggleEnergySaving(yn.equals("yes") || yn.equals("y"));
+                    break;
+                }
+                case "9": {
+                    System.out.print("Create motion-night rule name: ");
+                    String rname = sc.nextLine().trim();
+                    System.out.print("Enter sensor id: ");
+                    String sid = sc.nextLine().trim();
+                    System.out.print("Enter comma-separated light ids to turn on: ");
+                    String[] parts = sc.nextLine().trim().split(",");
+                    List<String> lights = new ArrayList<>();
+                    for (String p : parts) lights.add(p.trim());
+                    // default night 20->06
+                    MotionNightRule r = new MotionNightRule(rname, sid, lights, 20, 6);
+                    system.addRule(r);
+                    System.out.println("Rule added.");
+                    break;
+                }
+                case "10": Persistence.save(system); break;
+                case "11": Persistence.save(system); System.out.println("Exiting..."); System.exit(0);
+                default: System.out.println("Invalid choice.");
+            }
+        }
+    }
+}
