@@ -1,0 +1,205 @@
+import java.io.*;
+import java.util.*;
+
+/**
+ * Car Manufacturing Management System
+ * Author: Java Code Hub
+ * Description: Manages large-scale car manufacturing, stock, and sales.
+ */
+
+class Car implements Serializable {
+    String modelId;
+    String name;
+    String brand;
+    double costPrice;
+    double sellPrice;
+    int stock;
+
+    public Car(String modelId, String name, String brand, double costPrice, double sellPrice, int stock) {
+        this.modelId = modelId;
+        this.name = name;
+        this.brand = brand;
+        this.costPrice = costPrice;
+        this.sellPrice = sellPrice;
+        this.stock = stock;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%-10s %-18s %-12s %-10.2f %-10.2f %-6d",
+                modelId, name, brand, costPrice, sellPrice, stock);
+    }
+}
+
+class FileManager {
+    private static final String FILE_NAME = "cars.dat";
+
+    @SuppressWarnings("unchecked")
+    public static List<Car> loadCars() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILE_NAME))) {
+            return (List<Car>) ois.readObject();
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
+    }
+
+    public static void saveCars(List<Car> cars) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE_NAME))) {
+            oos.writeObject(cars);
+        } catch (IOException e) {
+            System.out.println(" Error saving data: " + e.getMessage());
+        }
+    }
+}
+
+class ManufacturingUnit {
+    private List<Car> cars;
+    private double totalProfit;
+
+    public ManufacturingUnit() {
+        this.cars = FileManager.loadCars();
+        this.totalProfit = 0;
+    }
+
+    public void addCar(String modelId, String name, String brand, double cost, double sell, int stock) {
+        cars.add(new Car(modelId, name, brand, cost, sell, stock));
+        FileManager.saveCars(cars);
+        System.out.println(" Car " + name + " added successfully.\n");
+    }
+
+    public void showInventory() {
+        if (cars.isEmpty()) {
+            System.out.println("No cars in production inventory.\n");
+            return;
+        }
+        System.out.println("\n======  CAR INVENTORY======");
+        System.out.printf("%-10s %-18s %-12s %-10s %-10s %-6s\n",
+                "ModelID", "Car Name", "Brand", "Cost₹", "Sell₹", "Stock");
+        System.out.println("----------------");
+        for (Car c : cars) System.out.println(c);
+        System.out.println("=============\n");
+    }
+
+    public void manufacture(String modelId, int units) {
+        for (Car c : cars) {
+            if (c.modelId.equalsIgnoreCase(modelId)) {
+                c.stock += units;
+                FileManager.saveCars(cars);
+                System.out.println(" Manufactured " + units + " new units of " + c.name);
+                return;
+            }
+        }
+        System.out.println(" Car model not found!\n");
+    }
+
+    public void sellCar(String modelId, int qty) {
+        for (Car c : cars) {
+            if (c.modelId.equalsIgnoreCase(modelId)) {
+                if (qty > c.stock) {
+                    System.out.println(" Only " + c.stock + " units available.");
+                    return;
+                }
+                c.stock -= qty;
+                double profit = (c.sellPrice - c.costPrice) * qty;
+                totalProfit += profit;
+                FileManager.saveCars(cars);
+                System.out.println(" Sold " + qty + " " + c.name + "(s). Profit: ₹" + profit + "\n");
+                return;
+            }
+        }
+        System.out.println(" Car model not found!\n");
+    }
+
+    public void searchCar(String keyword) {
+        boolean found = false;
+        for (Car c : cars) {
+            if (c.name.toLowerCase().contains(keyword.toLowerCase()) ||
+                c.brand.toLowerCase().contains(keyword.toLowerCase())) {
+                if (!found) {
+                    System.out.println("\nSearch results for: " + keyword);
+                    System.out.printf("%-10s %-18s %-12s %-10s %-10s %-6s\n",
+                            "ModelID", "Car Name", "Brand", "Cost₹", "Sell₹", "Stock");
+                    System.out.println("-------------------------");
+                }
+                System.out.println(c);
+                found = true;
+            }
+        }
+        if (!found) System.out.println(" No matching cars found.\n");
+        else System.out.println();
+    }
+
+    public void showProfitReport() {
+        double totalStockValue = cars.stream().mapToDouble(c -> c.sellPrice * c.stock).sum();
+        System.out.println("\n=====  PROFIT REPORT ===");
+        System.out.println("Total Profit Earned: ₹" + totalProfit);
+        System.out.println("Remaining Stock Value: ₹" + totalStockValue);
+        System.out.println("=================================\n");
+    }
+}
+
+public class CarManufacturingSystem {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        ManufacturingUnit unit = new ManufacturingUnit();
+
+        while (true) {
+            System.out.println("===  CAR MANUFACTURING MANAGEMENT =========");
+            System.out.println("1. Add New Car Model");
+            System.out.println("2. Show Inventory");
+            System.out.println("3. Manufacture Cars");
+            System.out.println("4. Sell Cars");
+            System.out.println("5. Search Car Model");
+            System.out.println("6. Profit & Stock Report");
+            System.out.println("7. Exit");
+            System.out.print(" Enter choice: ");
+
+            int choice = sc.nextInt();
+            sc.nextLine();
+
+            switch (choice) {
+                case 1 -> {
+                    System.out.print("Enter Model ID: ");
+                    String id = sc.nextLine();
+                    System.out.print("Enter Car Name: ");
+                    String name = sc.nextLine();
+                    System.out.print("Enter Brand: ");
+                    String brand = sc.nextLine();
+                    System.out.print("Enter Cost Price (₹): ");
+                    double cost = sc.nextDouble();
+                    System.out.print("Enter Selling Price (₹): ");
+                    double sell = sc.nextDouble();
+                    System.out.print("Enter Initial Stock: ");
+                    int stock = sc.nextInt();
+                    unit.addCar(id, name, brand, cost, sell, stock);
+                }
+                case 2 -> unit.showInventory();
+                case 3 -> {
+                    System.out.print("Enter Model ID: ");
+                    String id = sc.nextLine();
+                    System.out.print("Enter Units to Manufacture: ");
+                    int units = sc.nextInt();
+                    unit.manufacture(id, units);
+                }
+                case 4 -> {
+                    System.out.print("Enter Model ID: ");
+                    String id = sc.nextLine();
+                    System.out.print("Enter Quantity to Sell: ");
+                    int qty = sc.nextInt();
+                    unit.sellCar(id, qty);
+                }
+                case 5 -> {
+                    System.out.print("Enter Car or Brand to Search: ");
+                    String key = sc.nextLine();
+                    unit.searchCar(key);
+                }
+                case 6 -> unit.showProfitReport();
+                case 7 -> {
+                    System.out.println(" Exiting Car Manufacturing System. Drive safe!");
+                    return;
+                }
+                default -> System.out.println(" Invalid choice! Try again.\n");
+            }
+        }
+    }
+}
