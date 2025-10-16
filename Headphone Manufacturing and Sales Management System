@@ -1,0 +1,178 @@
+import java.util.*;
+
+// Class to represent a Headphone
+class Headphone {
+    String modelId;
+    String brand;
+    String name;
+    double costPrice;
+    double sellPrice;
+    int stock;
+
+    public Headphone(String modelId, String brand, String name, double costPrice, double sellPrice, int stock) {
+        this.modelId = modelId;
+        this.brand = brand;
+        this.name = name;
+        this.costPrice = costPrice;
+        this.sellPrice = sellPrice;
+        this.stock = stock;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%-8s | %-10s | %-18s | ₹%-10.2f | ₹%-10.2f | Stock: %d",
+                modelId, brand, name, costPrice, sellPrice, stock);
+    }
+}
+
+// Class to manage headphones (manufacturing, sales, profit, etc.)
+class HeadphoneCompany {
+    private List<Headphone> headphones = new ArrayList<>();
+    private double totalProfit = 0.0;
+
+    // Add new headphone model
+    public void addHeadphone() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter Model ID: ");
+        String id = sc.nextLine();
+        System.out.print("Enter Brand: ");
+        String brand = sc.nextLine();
+        System.out.print("Enter Model Name: ");
+        String name = sc.nextLine();
+        System.out.print("Enter Cost Price (₹): ");
+        double cost = sc.nextDouble();
+        System.out.print("Enter Selling Price (₹): ");
+        double sell = sc.nextDouble();
+        System.out.print("Enter Initial Stock: ");
+        int stock = sc.nextInt();
+
+        headphones.add(new Headphone(id, brand, name, cost, sell, stock));
+        System.out.println(" Headphone model added successfully!\n");
+    }
+
+    // Display all headphones
+    public void displayInventory() {
+        if (headphones.isEmpty()) {
+            System.out.println(" No headphones available.\n");
+            return;
+        }
+
+        System.out.println("\n====== HEADPHONE INVENTORY ==========");
+        System.out.println("ModelID  | Brand      | Name                | Cost       | Sell       | Stock");
+        System.out.println("-----------------");
+        for (Headphone hp : headphones) {
+            System.out.println(hp);
+        }
+        System.out.println("=====================\n");
+    }
+
+    // Manufacture more units
+    public void manufactureUnits() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter Model ID to Manufacture More: ");
+        String id = sc.nextLine();
+
+        for (Headphone hp : headphones) {
+            if (hp.modelId.equalsIgnoreCase(id)) {
+                System.out.print("Enter Quantity to Add: ");
+                int qty = sc.nextInt();
+                hp.stock += qty;
+                System.out.println(" Added " + qty + " units to stock. Total Stock: " + hp.stock + "\n");
+                return;
+            }
+        }
+        System.out.println(" Model not found!\n");
+    }
+
+    // Sell headphones and calculate profit
+    public void sellHeadphone() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter Model ID to Sell: ");
+        String id = sc.nextLine();
+
+        for (Headphone hp : headphones) {
+            if (hp.modelId.equalsIgnoreCase(id)) {
+                System.out.print("Enter Quantity to Sell: ");
+                int qty = sc.nextInt();
+                if (qty > hp.stock) {
+                    System.out.println(" Only " + hp.stock + " units available!");
+                    return;
+                }
+                hp.stock -= qty;
+                double profit = (hp.sellPrice - hp.costPrice) * qty;
+                totalProfit += profit;
+                System.out.printf(" Sold %d %s %s headphones. Profit: ₹%.2f%n%n",
+                        qty, hp.brand, hp.name, profit);
+                return;
+            }
+        }
+        System.out.println(" Headphone model not found!\n");
+    }
+
+    // Search by brand or name
+    public void searchHeadphone() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter Brand or Model Name to Search: ");
+        String keyword = sc.nextLine().toLowerCase();
+        boolean found = false;
+
+        System.out.println("\n Search Results:");
+        for (Headphone hp : headphones) {
+            if (hp.brand.toLowerCase().contains(keyword) || hp.name.toLowerCase().contains(keyword)) {
+                System.out.println(hp);
+                found = true;
+            }
+        }
+        if (!found) System.out.println(" No headphones found with that keyword.\n");
+    }
+
+    // Show profit and stock report
+    public void showReport() {
+        double totalStockValue = 0;
+        for (Headphone hp : headphones) {
+            totalStockValue += hp.sellPrice * hp.stock;
+        }
+        System.out.println("\n======  COMPANY REPORT =============");
+        System.out.printf("Total Profit Earned: ₹%.2f%n", totalProfit);
+        System.out.printf("Total Remaining Stock Value: ₹%.2f%n", totalStockValue);
+        System.out.println("=============================\n");
+    }
+}
+
+// Main Class
+public class HeadphoneManagementSystem {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        HeadphoneCompany company = new HeadphoneCompany();
+
+        while (true) {
+            System.out.println("==========  HEADPHONE MANUFACTURING & SALES ======");
+            System.out.println("1. Add New Headphone");
+            System.out.println("2. Show Inventory");
+            System.out.println("3. Manufacture More Units");
+            System.out.println("4. Sell Headphone");
+            System.out.println("5. Search Headphone");
+            System.out.println("6. Show Profit Report");
+            System.out.println("7. Exit");
+            System.out.println("======================");
+            System.out.print(" Enter your choice: ");
+
+            int choice = sc.nextInt();
+            sc.nextLine();
+
+            switch (choice) {
+                case 1 -> company.addHeadphone();
+                case 2 -> company.displayInventory();
+                case 3 -> company.manufactureUnits();
+                case 4 -> company.sellHeadphone();
+                case 5 -> company.searchHeadphone();
+                case 6 -> company.showReport();
+                case 7 -> {
+                    System.out.println(" Exiting Headphone Management System. Goodbye!");
+                    return;
+                }
+                default -> System.out.println("⚠️ Invalid choice! Try again.\n");
+            }
+        }
+    }
+}
