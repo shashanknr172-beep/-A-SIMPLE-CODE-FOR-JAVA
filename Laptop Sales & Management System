@@ -1,0 +1,158 @@
+import java.util.*;
+
+class Laptop {
+    private String id;
+    private String brand;
+    private String model;
+    private double costPrice;
+    private double sellingPrice;
+    private int stock;
+
+    public Laptop(String id, String brand, String model, double costPrice, double sellingPrice, int stock) {
+        this.id = id;
+        this.brand = brand;
+        this.model = model;
+        this.costPrice = costPrice;
+        this.sellingPrice = sellingPrice;
+        this.stock = stock;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public double getSellingPrice() {
+        return sellingPrice;
+    }
+
+    public double getCostPrice() {
+        return costPrice;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
+    }
+
+    public void displayDetails() {
+        System.out.printf("ID: %s | %s %s | Cost: %.2f | Price: %.2f | Stock: %d%n",
+                id, brand, model, costPrice, sellingPrice, stock);
+    }
+}
+
+class LaptopStore {
+    private List<Laptop> inventory = new ArrayList<>();
+    private double totalProfit = 0;
+
+    public void addLaptop(Laptop laptop) {
+        inventory.add(laptop);
+        System.out.println(" Laptop added to inventory: " + laptop.getBrand());
+    }
+
+    public void displayInventory() {
+        if (inventory.isEmpty()) {
+            System.out.println(" No laptops in inventory!");
+            return;
+        }
+        System.out.println("\n--- 🖥️ Current Inventory ---");
+        for (Laptop laptop : inventory) {
+            laptop.displayDetails();
+        }
+    }
+
+    public void sellLaptop(String id, int quantity) {
+        for (Laptop laptop : inventory) {
+            if (laptop.getId().equalsIgnoreCase(id)) {
+                if (laptop.getStock() >= quantity) {
+                    double profit = (laptop.getSellingPrice() - laptop.getCostPrice()) * quantity;
+                    totalProfit += profit;
+                    laptop.setStock(laptop.getStock() - quantity);
+                    System.out.println(" Sold " + quantity + " units of " + laptop.getBrand() + ". Profit: ₹" + profit);
+                } else {
+                    System.out.println(" Not enough stock available!");
+                }
+                return;
+            }
+        }
+        System.out.println(" Laptop ID not found!");
+    }
+
+    public void viewProfit() {
+        System.out.println("\n Total Profit so far: ₹" + totalProfit);
+    }
+}
+
+public class LaptopSalesManagement {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        LaptopStore store = new LaptopStore();
+
+        // Preloaded data
+        store.addLaptop(new Laptop("L101", "Dell", "Inspiron 15", 45000, 52000, 10));
+        store.addLaptop(new Laptop("L102", "HP", "Pavilion 14", 48000, 56000, 8));
+        store.addLaptop(new Laptop("L103", "Apple", "MacBook Air M2", 90000, 110000, 5));
+
+        boolean running = true;
+        while (running) {
+            System.out.println("\n=====  LAPTOP SALES MANAGEMENT SYSTEM =====");
+            System.out.println(" View Inventory");
+            System.out.println(" Sell Laptop");
+            System.out.println(" View Profit");
+            System.out.println(" Add New Laptop");
+            System.out.println(" Exit");
+            System.out.print("Choose an option: ");
+            int choice = sc.nextInt();
+            sc.nextLine();
+
+            switch (choice) {
+                case 1:
+                    store.displayInventory();
+                    break;
+
+                case 2:
+                    System.out.print("Enter Laptop ID to sell: ");
+                    String id = sc.nextLine();
+                    System.out.print("Enter Quantity: ");
+                    int qty = sc.nextInt();
+                    store.sellLaptop(id, qty);
+                    break;
+
+                case 3:
+                    store.viewProfit();
+                    break;
+
+                case 4:
+                    System.out.print("Enter Laptop ID: ");
+                    String newId = sc.nextLine();
+                    System.out.print("Enter Brand: ");
+                    String brand = sc.nextLine();
+                    System.out.print("Enter Model: ");
+                    String model = sc.nextLine();
+                    System.out.print("Enter Cost Price: ");
+                    double cost = sc.nextDouble();
+                    System.out.print("Enter Selling Price: ");
+                    double price = sc.nextDouble();
+                    System.out.print("Enter Stock Quantity: ");
+                    int stock = sc.nextInt();
+                    store.addLaptop(new Laptop(newId, brand, model, cost, price, stock));
+                    break;
+
+                case 5:
+                    System.out.println(" Exiting System... Thank you!");
+                    running = false;
+                    break;
+
+                default:
+                    System.out.println(" Invalid option, please try again!");
+            }
+        }
+        sc.close();
+    }
+}
