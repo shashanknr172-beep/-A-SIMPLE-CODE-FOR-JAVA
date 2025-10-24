@@ -1,0 +1,149 @@
+import java.util.*;
+import java.io.*;
+import java.text.SimpleDateFormat;
+
+// Represents a single sensor
+class Sensor {
+    private String name;
+    private double value;
+    private double minLimit;
+    private double maxLimit;
+    private boolean faultDetected;
+
+    public Sensor(String name, double minLimit, double maxLimit) {
+        this.name = name;
+        this.minLimit = minLimit;
+        this.maxLimit = maxLimit;
+        this.faultDetected = false;
+    }
+
+    public void updateValue(double newValue) {
+        this.value = newValue;
+        checkForFault();
+    }
+
+    private void checkForFault() {
+        if (value < minLimit || value > maxLimit) {
+            faultDetected = true;
+        } else {
+            faultDetected = false;
+        }
+    }
+
+    public boolean isFaultDetected() {
+        return faultDetected;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public double getValue() {
+        return value;
+    }
+
+    public String getStatus() {
+        return faultDetected ? " FAULT DETECTED" : " Normal";
+    }
+
+    public String getDetails() {
+        return String.format("%-15s | Value: %.2f | Range: [%.1f - %.1f] | %s",
+                name, value, minLimit, maxLimit, getStatus());
+    }
+}
+
+// Handles monitoring and logging
+class SystemMonitor {
+    private List<Sensor> sensors;
+    private double faultThreshold;
+    private File logFile;
+
+    public SystemMonitor(double faultThreshold) {
+        this.sensors = new ArrayList<>();
+        this.faultThreshold = faultThreshold;
+        this.logFile = new File("SystemFaultLog.txt");
+    }
+
+    public void addSensor(Sensor sensor) {
+        sensors.add(sensor);
+    }
+
+    public void simulateReadings() {
+        Random rand = new Random();
+        for (Sensor sensor : sensors) {
+            double reading = sensor.getName().equals("Temperature") ? 20 + rand.nextDouble() * 100 :
+                             sensor.getName().equals("Voltage") ? 10 + rand.nextDouble() * 250 :
+                             sensor.getName().equals("CPU Load") ? rand.nextDouble() * 100 :
+                             0 + rand.nextDouble() * 2000; // Memory
+            sensor.updateValue(reading);
+        }
+    }
+
+    public void checkSystem() {
+        System.out.println("\n=== SYSTEM STATUS REPORT ==");
+        int faultCount = 0;
+        for (Sensor s : sensors) {
+            System.out.println(s.getDetails());
+            if (s.isFaultDetected()) faultCount++;
+        }
+        double faultPercent = (faultCount / (double) sensors.size()) * 100;
+        System.out.printf(" Total Fault Percentage: %.2f%%\n", faultPercent);
+        if (faultPercent >= faultThreshold) {
+            System.out.println(" SYSTEM WARNING: Multiple faults detected! Immediate attention required.");
+            logFault("System Fault Warning triggered. Fault percentage: " + faultPercent);
+        } else {
+            System.out.println(" System Operating Normally.");
+        }
+    }
+
+    private void logFault(String message) {
+        try (FileWriter fw = new FileWriter(logFile, true);
+             BufferedWriter bw = new BufferedWriter(fw)) {
+            String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+            bw.write("[" + timestamp + "] " + message + "\n");
+        } catch (IOException e) {
+            System.out.println("Error logging fault: " + e.getMessage());
+        }
+    }
+}
+
+public class SystemFaultDetection {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        SystemMonitor monitor = new SystemMonitor(40.0); // Threshold %
+
+        // Add sensors representing real-world system parameters
+        monitor.addSensor(new Sensor("Temperature", 30, 80));
+        monitor.addSensor(new Sensor("Voltage", 180, 240));
+        monitor.addSensor(new Sensor("CPU Load", 0, 90));
+        monitor.addSensor(new Sensor("Memory Usage", 0, 1600));
+
+        boolean running = true;
+
+        System.out.println("===  SMART SYSTEM FAULT DETECTION SYSTEM ===");
+        while (running) {
+            System.out.println("\n Simulate Sensor Readings");
+            System.out.println(" Check System Health");
+            System.out.println(" Exit Program");
+            System.out.print("Choose an option: ");
+            int choice = sc.nextInt();
+
+            switch (choice) {
+                case 1:
+                    monitor.simulateReadings();
+                    System.out.println(" New sensor readings simulated.");
+                    break;
+                case 2:
+                    monitor.checkSystem();
+                    break;
+                case 3:
+                    System.out.println(" Exiting System. Logs saved to SystemFaultLog.txt");
+                    running = false;
+                    break;
+                default:
+                    System.out.println(" Invalid option, try again!");
+            }
+        }
+        sc.close();
+    }
+}
