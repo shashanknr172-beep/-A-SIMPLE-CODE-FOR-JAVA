@@ -1,0 +1,189 @@
+import java.util.*;
+
+// Class representing a pizza item
+class Pizza {
+    private String name;
+    private String size;
+    private double price;
+
+    public Pizza(String name, String size, double price) {
+        this.name = name;
+        this.size = size;
+        this.price = price;
+    }
+
+    public String getName() { return name; }
+    public String getSize() { return size; }
+    public double getPrice() { return price; }
+
+    @Override
+    public String toString() {
+        return name + " (" + size + ") - ₹" + price;
+    }
+}
+
+// Class representing a customer order
+class Order {
+    private List<Pizza> pizzas = new ArrayList<>();
+    private String customerName;
+    private String phone;
+    private boolean confirmed;
+
+    public Order(String customerName, String phone) {
+        this.customerName = customerName;
+        this.phone = phone;
+        this.confirmed = false;
+    }
+
+    public void addPizza(Pizza pizza) {
+        pizzas.add(pizza);
+        System.out.println(" Added: " + pizza);
+    }
+
+    public double calculateTotal() {
+        double total = 0;
+        for (Pizza pizza : pizzas) {
+            total += pizza.getPrice();
+        }
+        return total;
+    }
+
+    public void confirmOrder() {
+        confirmed = true;
+        System.out.println(" Order confirmed for " + customerName + " (Phone: " + phone + ")");
+    }
+
+    public void displayOrderDetails() {
+        System.out.println("\n===  ORDER DETAILS ===");
+        System.out.println("Customer: " + customerName);
+        System.out.println("Phone: " + phone);
+        for (Pizza pizza : pizzas) {
+            System.out.println("- " + pizza);
+        }
+        System.out.println("Total Amount: ₹" + calculateTotal());
+        System.out.println("Status: " + (confirmed ? "Confirmed " : "Pending "));
+        System.out.println("=====");
+    }
+}
+
+// Class representing the Pizza Shop
+class PizzaShop {
+    private List<Pizza> menu = new ArrayList<>();
+    private List<Order> orders = new ArrayList<>();
+
+    public PizzaShop() {
+        // Predefined Menu
+        menu.add(new Pizza("Margherita", "Small", 199));
+        menu.add(new Pizza("Margherita", "Medium", 299));
+        menu.add(new Pizza("Margherita", "Large", 399));
+
+        menu.add(new Pizza("Farmhouse", "Small", 249));
+        menu.add(new Pizza("Farmhouse", "Medium", 349));
+        menu.add(new Pizza("Farmhouse", "Large", 449));
+
+        menu.add(new Pizza("Pepperoni", "Small", 299));
+        menu.add(new Pizza("Pepperoni", "Medium", 399));
+        menu.add(new Pizza("Pepperoni", "Large", 499));
+    }
+
+    public void showMenu() {
+        System.out.println("\n===  PIZZA MENU ===");
+        for (int i = 0; i < menu.size(); i++) {
+            System.out.println((i + 1) + ". " + menu.get(i));
+        }
+        System.out.println("=====");
+    }
+
+    public Pizza choosePizza(int index) {
+        if (index < 1 || index > menu.size()) {
+            System.out.println(" Invalid selection!");
+            return null;
+        }
+        return menu.get(index - 1);
+    }
+
+    public void takeOrder(Scanner sc) {
+        System.out.print("Enter Customer Name: ");
+        String name = sc.nextLine();
+        System.out.print("Enter Phone Number: ");
+        String phone = sc.nextLine();
+
+        Order order = new Order(name, phone);
+        boolean adding = true;
+
+        while (adding) {
+            showMenu();
+            System.out.print("Select Pizza Number to Add: ");
+            int choice = sc.nextInt();
+            Pizza pizza = choosePizza(choice);
+            if (pizza != null) {
+                order.addPizza(pizza);
+            }
+            System.out.print("Add another pizza? (y/n): ");
+            String again = sc.next().toLowerCase();
+            sc.nextLine(); // consume newline
+            if (!again.equals("y")) {
+                adding = false;
+            }
+        }
+
+        order.displayOrderDetails();
+        System.out.print("Confirm Order? (y/n): ");
+        String confirm = sc.nextLine().toLowerCase();
+        if (confirm.equals("y")) {
+            order.confirmOrder();
+            orders.add(order);
+        } else {
+            System.out.println(" Order not confirmed.");
+        }
+    }
+
+    public void showAllOrders() {
+        if (orders.isEmpty()) {
+            System.out.println(" No orders placed yet.");
+        } else {
+            for (Order o : orders) {
+                o.displayOrderDetails();
+            }
+        }
+    }
+}
+
+public class PizzaBookingSystem {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        PizzaShop shop = new PizzaShop();
+        boolean running = true;
+
+        System.out.println("===  WELCOME TO JAVA PIZZA SHOP ===");
+
+        while (running) {
+            System.out.println("\n View Menu");
+            System.out.println(" Place Order");
+            System.out.println(" View All Orders");
+            System.out.println(" Exit");
+            System.out.print("Choose Option: ");
+            int choice = sc.nextInt();
+            sc.nextLine(); // consume newline
+
+            switch (choice) {
+                case 1:
+                    shop.showMenu();
+                    break;
+                case 2:
+                    shop.takeOrder(sc);
+                    break;
+                case 3:
+                    shop.showAllOrders();
+                    break;
+                case 4:
+                    running = false;
+                    System.out.println(" Thank you for visiting Java Pizza!");
+                    break;
+                default:
+                    System.out.println(" Invalid choice, try again!");
+            }
+        }
+        sc.close();
+    }
+}
