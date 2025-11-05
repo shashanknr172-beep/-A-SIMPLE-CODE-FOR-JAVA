@@ -1,0 +1,112 @@
+import java.util.*;
+
+class Engine {
+    String id;
+    String model;
+    double temperature;
+    int rpm;
+    double oilPressure;
+    String status;
+
+    public Engine(String id, String model) {
+        this.id = id;
+        this.model = model;
+        this.temperature = 0;
+        this.rpm = 0;
+        this.oilPressure = 0;
+        this.status = "Not Tested";
+    }
+
+    public void testEngine() {
+        Random r = new Random();
+        temperature = 70 + r.nextDouble() * 60; // 70-130°C
+        rpm = 800 + r.nextInt(4200);            // 800-5000 RPM
+        oilPressure = 20 + r.nextDouble() * 40; // 20-60 psi
+
+        if (temperature < 120 && rpm < 4800 && oilPressure > 25) {
+            status = " Passed";
+        } else {
+            status = "Failed";
+        }
+    }
+
+    public void displayReport() {
+        System.out.println("\n--- Engine Report ---");
+        System.out.println("Engine ID: " + id);
+        System.out.println("Model: " + model);
+        System.out.printf("Temperature: %.2f°C\n", temperature);
+        System.out.println("RPM: " + rpm);
+        System.out.printf("Oil Pressure: %.2f psi\n", oilPressure);
+        System.out.println("Status: " + status);
+    }
+}
+
+class EngineFactory {
+    List<Engine> engines = new ArrayList<>();
+
+    public void manufactureEngine(String model) {
+        String id = "ENG" + (engines.size() + 1001);
+        Engine e = new Engine(id, model);
+        engines.add(e);
+        System.out.println(" Engine manufactured with ID: " + id);
+    }
+
+    public void testAllEngines() {
+        if (engines.isEmpty()) {
+            System.out.println(" No engines available for testing!");
+            return;
+        }
+        for (Engine e : engines) {
+            e.testEngine();
+            e.displayReport();
+        }
+    }
+
+    public void showAllEngines() {
+        if (engines.isEmpty()) {
+            System.out.println(" No engines manufactured yet!");
+            return;
+        }
+        System.out.println("\n--- Engine Inventory ---");
+        for (Engine e : engines) {
+            System.out.println(e.id + " | " + e.model + " | Status: " + e.status);
+        }
+    }
+}
+
+public class EngineControlSystem {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        EngineFactory factory = new EngineFactory();
+
+        while (true) {
+            System.out.println("\n=== ENGINE MANUFACTURING & CONTROL SYSTEM ===");
+            System.out.println(" Manufacture New Engine");
+            System.out.println(" Test All Engines");
+            System.out.println(" Show Engine Inventory");
+            System.out.println(" Exit");
+            System.out.print("Enter your choice: ");
+            int ch = sc.nextInt();
+            sc.nextLine();
+
+            switch (ch) {
+                case 1:
+                    System.out.print("Enter Engine Model Name: ");
+                    String model = sc.nextLine();
+                    factory.manufactureEngine(model);
+                    break;
+                case 2:
+                    factory.testAllEngines();
+                    break;
+                case 3:
+                    factory.showAllEngines();
+                    break;
+                case 4:
+                    System.out.println(" Exiting System. Thank you!");
+                    return;
+                default:
+                    System.out.println(" Invalid choice!");
+            }
+        }
+    }
+}
