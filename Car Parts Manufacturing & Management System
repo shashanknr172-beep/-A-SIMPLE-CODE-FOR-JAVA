@@ -1,0 +1,147 @@
+import java.util.*;
+
+class CarPart {
+    String partId;
+    String partName;
+    String category;
+    int quantity;
+    String qualityStatus;
+
+    public CarPart(String partId, String partName, String category, int quantity) {
+        this.partId = partId;
+        this.partName = partName;
+        this.category = category;
+        this.quantity = quantity;
+        this.qualityStatus = "Not Tested";
+    }
+
+    public void testQuality() {
+        Random r = new Random();
+        int test = r.nextInt(100);
+        if (test > 85)
+            qualityStatus = " Rejected";
+        else if (test > 60)
+            qualityStatus = " Needs Rework";
+        else
+            qualityStatus = " Passed";
+    }
+
+    public void showDetails() {
+        System.out.println("-----------------------");
+        System.out.println("Part ID: " + partId);
+        System.out.println("Part Name: " + partName);
+        System.out.println("Category: " + category);
+        System.out.println("Quantity: " + quantity);
+        System.out.println("Quality Status: " + qualityStatus);
+    }
+}
+
+class ManufacturingPlant {
+    private List<CarPart> parts = new ArrayList<>();
+
+    public void manufacturePart(String name, String category, int quantity) {
+        String id = "CP" + (parts.size() + 1001);
+        CarPart part = new CarPart(id, name, category, quantity);
+        parts.add(part);
+        System.out.println(" Manufactured Part ID: " + id + " (" + name + ")");
+    }
+
+    public void testAllParts() {
+        if (parts.isEmpty()) {
+            System.out.println(" No parts available for testing!");
+            return;
+        }
+        System.out.println("\n--- QUALITY TEST REPORT ---");
+        for (CarPart p : parts) {
+            p.testQuality();
+            p.showDetails();
+        }
+    }
+
+    public void showInventory() {
+        if (parts.isEmpty()) {
+            System.out.println(" No parts manufactured yet!");
+            return;
+        }
+        System.out.println("\n--- CAR PARTS INVENTORY ---");
+        for (CarPart p : parts) {
+            System.out.println(p.partId + " | " + p.partName + " | " + p.category + " | Qty: " + p.quantity + " | " + p.qualityStatus);
+        }
+    }
+
+    public void filterByCategory(String category) {
+        boolean found = false;
+        System.out.println("\n--- Parts in Category: " + category + " ---");
+        for (CarPart p : parts) {
+            if (p.category.equalsIgnoreCase(category)) {
+                System.out.println(p.partId + " | " + p.partName + " | Qty: " + p.quantity + " | " + p.qualityStatus);
+                found = true;
+            }
+        }
+        if (!found)
+            System.out.println(" No parts found in this category.");
+    }
+
+    public void removeRejectedParts() {
+        parts.removeIf(p -> p.qualityStatus.equals(" Rejected"));
+        System.out.println(" Rejected parts removed from inventory.");
+    }
+}
+
+public class CarPartsManufacturingSystem {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        ManufacturingPlant plant = new ManufacturingPlant();
+
+        while (true) {
+            System.out.println("\n===  CAR PARTS MANUFACTURING SYSTEM ===");
+            System.out.println(" Manufacture New Part");
+            System.out.println(" View Inventory");
+            System.out.println(" Test All Parts");
+            System.out.println(" Filter by Category");
+            System.out.println("Remove Rejected Parts");
+            System.out.println(" Exit");
+            System.out.print("Enter your choice: ");
+            int ch = sc.nextInt();
+            sc.nextLine();
+
+            switch (ch) {
+                case 1:
+                    System.out.print("Enter Part Name: ");
+                    String name = sc.nextLine();
+                    System.out.println("Choose Category: Engine / Body / Electrical / Interior");
+                    String category = sc.nextLine();
+                    System.out.print("Enter Quantity: ");
+                    int qty = sc.nextInt();
+                    sc.nextLine();
+                    plant.manufacturePart(name, category, qty);
+                    break;
+
+                case 2:
+                    plant.showInventory();
+                    break;
+
+                case 3:
+                    plant.testAllParts();
+                    break;
+
+                case 4:
+                    System.out.print("Enter Category to filter: ");
+                    String cat = sc.nextLine();
+                    plant.filterByCategory(cat);
+                    break;
+
+                case 5:
+                    plant.removeRejectedParts();
+                    break;
+
+                case 6:
+                    System.out.println(" Exiting Manufacturing System. Data saved successfully!");
+                    return;
+
+                default:
+                    System.out.println(" Invalid choice! Try again.");
+            }
+        }
+    }
+}
