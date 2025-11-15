@@ -1,0 +1,105 @@
+import java.util.*;
+
+class Wire {
+    String wireId, type;
+    int length;        // in meters
+    int stock;
+    String quality;
+
+    public Wire(String wireId, String type, int length, int stock) {
+        this.wireId = wireId;
+        this.type = type;
+        this.length = length;
+        this.stock = stock;
+        this.quality = "Not Tested";
+    }
+
+    void testQuality() {
+        int q = new Random().nextInt(100);
+        if (q > 85) quality = " Failed";
+        else if (q > 60) quality = " Medium";
+        else quality = " Good";
+    }
+
+    void addStock(int qty) { stock += qty; }
+    boolean sellWire(int qty) {
+        if (qty > stock) return false;
+        stock -= qty;
+        return true;
+    }
+
+    public String toString() {
+        return wireId + " | " + type + " | " + length + "m | Stock: " 
+               + stock + " | Quality: " + quality;
+    }
+}
+
+public class ElectricWireManagement {
+    static Map<String, Wire> wires = new HashMap<>();
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        wires.put("W001", new Wire("W001", "Copper", 20, 50));
+        wires.put("W002", new Wire("W002", "Aluminium", 10, 40));
+        wires.put("W003", new Wire("W003", "Fiber", 50, 25));
+
+        while (true) {
+            System.out.println("\n=== Electric Wire Management System ===");
+            System.out.println("1. View All Wires");
+            System.out.println("2. Add Stock");
+            System.out.println("3. Sell Wire");
+            System.out.println("4. Test Wire Quality");
+            System.out.println("5. Exit");
+            System.out.print("Enter Choice: ");
+
+            int ch = sc.nextInt();
+            sc.nextLine();
+
+            switch (ch) {
+                case 1:
+                    wires.values().forEach(System.out::println);
+                    break;
+
+                case 2:
+                    System.out.print("Enter Wire ID: ");
+                    String id = sc.nextLine();
+                    if (wires.containsKey(id)) {
+                        System.out.print("Enter Quantity to Add: ");
+                        wires.get(id).addStock(sc.nextInt());
+                        System.out.println("Stock Updated!");
+                    } else System.out.println("Invalid ID!");
+                    break;
+
+                case 3:
+                    System.out.print("Enter Wire ID: ");
+                    id = sc.nextLine();
+                    if (wires.containsKey(id)) {
+                        System.out.print("Enter Qty to Sell: ");
+                        int qty = sc.nextInt();
+                        if (wires.get(id).sellWire(qty))
+                            System.out.println("Sale Successful!");
+                        else
+                            System.out.println(" Not Enough Stock!");
+                    } else System.out.println("Invalid ID!");
+                    break;
+
+                case 4:
+                    System.out.print("Enter Wire ID: ");
+                    id = sc.nextLine();
+                    if (wires.containsKey(id)) {
+                        wires.get(id).testQuality();
+                        System.out.println("Quality Updated!");
+                    } else System.out.println("Invalid ID!");
+                    break;
+
+                case 5:
+                    System.out.println("Exiting... Goodbye!");
+                    return;
+
+                default:
+                    System.out.println("Invalid Choice!");
+            }
+        }
+    }
+}
