@@ -1,0 +1,16 @@
+import java.util.*;
+
+public class StudyTracker {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Hours studied today: ");
+        int hr = sc.nextInt();
+
+        if(hr < 2)
+            System.out.println(" Needs Improvement!");
+        else if(hr < 5)
+            System.out.println(" Good Progress!");
+        else
+            System.out.println(" Excellent! Keep it up!");
+    }
+}
