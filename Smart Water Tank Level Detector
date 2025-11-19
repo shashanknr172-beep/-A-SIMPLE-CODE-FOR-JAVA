@@ -1,0 +1,16 @@
+import java.util.*;
+
+public class WaterTank {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Tank Level (%): ");
+        int level = sc.nextInt();
+
+        if(level < 20)
+            System.out.println(" Tank Low → Pump ON");
+        else if(level > 90)
+            System.out.println(" Tank Full → Pump OFF");
+        else
+            System.out.println(" Normal Level");
+    }
+}
