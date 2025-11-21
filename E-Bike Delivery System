@@ -1,0 +1,79 @@
+import java.util.*;
+
+class EBike {
+    String bikeId;
+    int battery;       // battery percentage
+    boolean available;
+
+    EBike(String bikeId, int battery) {
+        this.bikeId = bikeId;
+        this.battery = battery;
+        this.available = true;
+    }
+
+    void useBike(int distance) {
+        int usage = distance * 2; // battery consumption logic
+        battery = Math.max(0, battery - usage);
+        if (battery < 20) available = false;
+    }
+}
+
+class Delivery {
+    String orderId;
+    String customerName;
+    int distance;
+    EBike assignedBike;
+
+    Delivery(String orderId, String customerName, int distance) {
+        this.orderId = orderId;
+        this.customerName = customerName;
+        this.distance = distance;
+    }
+}
+
+public class EBikeDeliverySystem {
+
+    static ArrayList<EBike> bikes = new ArrayList<>();
+    static ArrayList<Delivery> orders = new ArrayList<>();
+
+    public static EBike getAvailableBike() {
+        for (EBike b : bikes) {
+            if (b.available && b.battery >= 30) return b;
+        }
+        return null;
+    }
+
+    public static void assignOrder(Delivery d) {
+        EBike bike = getAvailableBike();
+        if (bike == null) {
+            System.out.println("No bike available for Order " + d.orderId);
+            return;
+        }
+        d.assignedBike = bike;
+        bike.available = false;
+        bike.useBike(d.distance);
+
+        System.out.println("Order Assigned: " + d.orderId +
+                " | Customer: " + d.customerName +
+                " | Bike: " + bike.bikeId +
+                " | Battery after trip: " + bike.battery + "%");
+    }
+
+    public static void main(String[] args) {
+
+        bikes.add(new EBike("EB001", 90));
+        bikes.add(new EBike("EB002", 70));
+        bikes.add(new EBike("EB003", 25));
+
+        orders.add(new Delivery("O101", "Rahul", 10));
+        orders.add(new Delivery("O102", "Priya", 5));
+        orders.add(new Delivery("O103", "Aman", 12));
+
+        for (Delivery d : orders) assignOrder(d);
+
+        System.out.println("\nBike Status After Deliveries:");
+        for (EBike b : bikes) {
+            System.out.println(b.bikeId + " | Battery: " + b.battery + "% | Available: " + b.available);
+        }
+    }
+}
