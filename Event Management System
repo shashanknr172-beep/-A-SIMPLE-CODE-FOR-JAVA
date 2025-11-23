@@ -1,0 +1,110 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
+class Event {
+    String eventName;
+    String eventType;
+    int capacity;
+    double pricePerPerson;
+    int booked;
+
+    Event(String name, String type, int capacity, double price) {
+        this.eventName = name;
+        this.eventType = type;
+        this.capacity = capacity;
+        this.pricePerPerson = price;
+        this.booked = 0;
+    }
+
+    boolean book(int count) {
+        if (booked + count <= capacity) {
+            booked += count;
+            return true;
+        }
+        return false;
+    }
+
+    double calculateRevenue() {
+        return booked * pricePerPerson;
+    }
+}
+
+class EventManagementSystem {
+    ArrayList<Event> events = new ArrayList<>();
+    Scanner sc = new Scanner(System.in);
+
+    void addEvent() {
+        System.out.println("\nEnter Event Name: ");
+        String name = sc.nextLine();
+        
+        System.out.println("Enter Event Type (Music/Tech/Wedding/Corporate): ");
+        String type = sc.nextLine();
+
+        System.out.println("Enter Capacity: ");
+        int cap = sc.nextInt();
+
+        System.out.println("Enter Price Per Person: ");
+        double price = sc.nextDouble();
+        sc.nextLine();
+
+        events.add(new Event(name, type, cap, price));
+        System.out.println("Event Added Successfully!");
+    }
+
+    void bookEvent() {
+        System.out.println("\nEnter Event Name to Book: ");
+        String name = sc.nextLine();
+
+        for (Event e : events) {
+            if (e.eventName.equalsIgnoreCase(name)) {
+                System.out.println("Enter Number of People: ");
+                int count = sc.nextInt();
+                sc.nextLine();
+
+                if (e.book(count)) {
+                    System.out.println("Booking Successful!");
+                } else {
+                    System.out.println("Not Enough Seats Available!");
+                }
+                return;
+            }
+        }
+        System.out.println("Event Not Found!");
+    }
+
+    void showSummary() {
+        System.out.println("\n---- Event Summary ----");
+        for (Event e : events) {
+            System.out.println("Event: " + e.eventName +
+                    " | Type: " + e.eventType +
+                    " | Booked: " + e.booked + "/" + e.capacity +
+                    " | Revenue: ₹" + e.calculateRevenue());
+        }
+    }
+
+    void menu() {
+        while (true) {
+            System.out.println("\nEVENT MANAGEMENT SYSTEM");
+            System.out.println("1. Add Event");
+            System.out.println("2. Book Event");
+            System.out.println("3. Show Summary");
+            System.out.println("4. Exit");
+            System.out.print("Choose Option: ");
+
+            int choice = sc.nextInt();
+            sc.nextLine();
+
+            switch (choice) {
+                case 1: addEvent(); break;
+                case 2: bookEvent(); break;
+                case 3: showSummary(); break;
+                case 4: System.out.println("Exiting..."); return;
+                default: System.out.println("Invalid Choice!");
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        new EventManagementSystem().menu();
+    }
+}
