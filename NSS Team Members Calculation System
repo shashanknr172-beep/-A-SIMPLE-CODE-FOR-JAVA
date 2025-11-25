@@ -1,0 +1,104 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
+class Member {
+    String name;
+    int hours;
+    int activities;
+
+    Member(String name, int hours, int activities) {
+        this.name = name;
+        this.hours = hours;
+        this.activities = activities;
+    }
+
+    int calculatePoints() {
+        return (hours * 2) + (activities * 5); // Points logic
+    }
+}
+
+class NSSTeam {
+    ArrayList<Member> members = new ArrayList<>();
+    Scanner sc = new Scanner(System.in);
+
+    void addMember() {
+        System.out.print("\nEnter Member Name: ");
+        String name = sc.nextLine();
+
+        System.out.print("Enter Hours Served: ");
+        int hours = sc.nextInt();
+
+        System.out.print("Enter Activities Completed: ");
+        int act = sc.nextInt();
+        sc.nextLine();
+
+        members.add(new Member(name, hours, act));
+        System.out.println("Member Added Successfully!");
+    }
+
+    void showMembers() {
+        System.out.println("\n---- NSS TEAM MEMBERS ----");
+        if (members.isEmpty()) {
+            System.out.println("No Members Added Yet!");
+            return;
+        }
+
+        for (Member m : members) {
+            System.out.println(m.name + " | Hours: " + m.hours +
+                    " | Activities: " + m.activities +
+                    " | Points: " + m.calculatePoints());
+        }
+    }
+
+    void teamReport() {
+        System.out.println("\n---- NSS TEAM REPORT ----");
+        int totalMembers = members.size();
+        int totalHours = 0;
+        int totalActivities = 0;
+        int totalPoints = 0;
+
+        for (Member m : members) {
+            totalHours += m.hours;
+            totalActivities += m.activities;
+            totalPoints += m.calculatePoints();
+        }
+
+        System.out.println("Total Members: " + totalMembers);
+        System.out.println("Total Hours Served: " + totalHours);
+        System.out.println("Total Activities Done: " + totalActivities);
+        System.out.println("Total Points Earned: " + totalPoints);
+
+        if (totalPoints >= 200)
+            System.out.println("Performance:  Excellent NSS Team");
+        else if (totalPoints >= 100)
+            System.out.println("Performance:  Good Contribution");
+        else
+            System.out.println("Performance:  Needs Improvement");
+    }
+
+    void menu() {
+        while (true) {
+            System.out.println("\n=== NSS TEAM MANAGEMENT SYSTEM ===");
+            System.out.println("1. Add Member");
+            System.out.println("2. Show Members");
+            System.out.println("3. Team Report");
+            System.out.println("4. Exit");
+            System.out.print("Choose Option: ");
+
+            int ch = sc.nextInt();
+            sc.nextLine();
+
+            switch (ch) {
+                case 1: addMember(); break;
+                case 2: showMembers(); break;
+                case 3: teamReport(); break;
+                case 4: System.out.println("Exiting..."); return;
+                default: System.out.println("Invalid Choice!");
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        new NSSTeam().menu();
+    }
+}
