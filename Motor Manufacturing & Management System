@@ -1,0 +1,97 @@
+import java.util.*;
+
+class Motor {
+    String model;
+    int power;
+    boolean isQualityPassed;
+
+    Motor(String model, int power) {
+        this.model = model;
+        this.power = power;
+        this.isQualityPassed = false;
+    }
+
+    void performQualityCheck() {
+        if (power >= 100 && power <= 400) {
+            isQualityPassed = true;
+            System.out.println(model + " passed quality check.");
+        } else {
+            System.out.println(model + " failed quality check.");
+        }
+    }
+}
+
+class Inventory {
+    List<Motor> stock = new ArrayList<>();
+
+    void addMotor(Motor motor) {
+        stock.add(motor);
+        System.out.println(motor.model + " added to inventory.");
+    }
+
+    void listStock() {
+        System.out.println("\n--- Current Motor Inventory ---");
+        for (Motor m : stock) {
+            System.out.println(m.model + " | Power: " + m.power + " | QC: "
+                    + (m.isQualityPassed ? "✔ Passed" : "✘ Failed"));
+        }
+        System.out.println("----------------\n");
+    }
+}
+
+class DispatchSystem {
+    void dispatchMotor(Motor motor) {
+        if (motor.isQualityPassed) {
+            System.out.println("Motor " + motor.model + " has been dispatched!");
+        } else {
+            System.out.println("Cannot dispatch " + motor.model + ": Quality not passed.");
+        }
+    }
+}
+
+public class MotorManufacturingSystem {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        Inventory inventory = new Inventory();
+        DispatchSystem dispatch = new DispatchSystem();
+
+        while (true) {
+            System.out.println("\n--- Motor Manufacturing System ---");
+            System.out.println("1. Manufacture Motor");
+            System.out.println("2. View Inventory");
+            System.out.println("3. Dispatch Motor");
+            System.out.println("4. Exit");
+            System.out.print("Enter choice: ");
+            int ch = sc.nextInt();
+
+            if (ch == 1) {
+                System.out.print("Enter Motor Model: ");
+                String model = sc.next();
+                System.out.print("Enter Power (100-400): ");
+                int power = sc.nextInt();
+
+                Motor m = new Motor(model, power);
+                m.performQualityCheck();
+                inventory.addMotor(m);
+
+            } else if (ch == 2) {
+                inventory.listStock();
+
+            } else if (ch == 3) {
+                System.out.print("Enter Model to Dispatch: ");
+                String model = sc.next();
+
+                for (Motor m : inventory.stock) {
+                    if (m.model.equalsIgnoreCase(model)) {
+                        dispatch.dispatchMotor(m);
+                    }
+                }
+
+            } else if (ch == 4) {
+                System.out.println("System shutting down...");
+                break;
+            }
+        }
+        sc.close();
+    }
+}
