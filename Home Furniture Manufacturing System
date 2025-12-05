@@ -1,0 +1,106 @@
+import java.util.*;
+
+class Furniture {
+    String type;
+    String material;
+    boolean qcPassed;
+    int timeToMake; // in hours
+
+    Furniture(String type, String material, int timeToMake) {
+        this.type = type;
+        this.material = material;
+        this.timeToMake = timeToMake;
+        this.qcPassed = false;
+    }
+
+    void performQualityCheck() {
+        if (timeToMake >= 2 && timeToMake <= 20) {
+            qcPassed = true;
+            System.out.println(type + " passed quality check.");
+        } else {
+            System.out.println(type + " failed quality check.");
+        }
+    }
+}
+
+class Inventory {
+    List<Furniture> store = new ArrayList<>();
+
+    void addFurniture(Furniture f) {
+        store.add(f);
+        System.out.println(f.type + " added to inventory.");
+    }
+
+    void showInventory() {
+        System.out.println("\n--- Furniture Inventory ---");
+        for (Furniture f : store) {
+            System.out.println(f.type + " | Material: " + f.material + " | Duration: "
+                    + f.timeToMake + " hrs | QC: " + (f.qcPassed ? "✔ Passed" : "✘ Failed"));
+        }
+        System.out.println("----------------\n");
+    }
+}
+
+class Dispatch {
+    void shipFurniture(Furniture f) {
+        if (f.qcPassed) {
+            System.out.println("Furniture " + f.type + " dispatched successfully!");
+        } else {
+            System.out.println("Cannot dispatch " + f.type + ": QC not passed.");
+        }
+    }
+}
+
+public class FurnitureManufacturingSystem {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        Inventory inventory = new Inventory();
+        Dispatch dispatch = new Dispatch();
+
+        while (true) {
+            System.out.println("==== Home Furniture Manufacturing ====");
+            System.out.println("1. Manufacture Furniture");
+            System.out.println("2. View Inventory");
+            System.out.println("3. Dispatch Furniture");
+            System.out.println("4. Exit");
+            System.out.print("Enter choice: ");
+            int ch = sc.nextInt();
+
+            if (ch == 1) {
+                System.out.print("Enter Furniture Type (Chair/Table/Bed): ");
+                String type = sc.next();
+                System.out.print("Enter Material (Wood/Steel/Plastic): ");
+                String material = sc.next();
+                System.out.print("Enter Time Required to Make (hrs): ");
+                int hrs = sc.nextInt();
+
+                Furniture f = new Furniture(type, material, hrs);
+                f.performQualityCheck();
+                inventory.addFurniture(f);
+
+            } else if (ch == 2) {
+                inventory.showInventory();
+
+            } else if (ch == 3) {
+                System.out.print("Enter Furniture Type to Dispatch: ");
+                String type = sc.next();
+
+                boolean found = false;
+                for (Furniture f : inventory.store) {
+                    if (f.type.equalsIgnoreCase(type)) {
+                        dispatch.shipFurniture(f);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                    System.out.println("Furniture not found!");
+
+            } else if (ch == 4) {
+                System.out.println("System closed.");
+                break;
+            }
+        }
+        sc.close();
+    }
+}
