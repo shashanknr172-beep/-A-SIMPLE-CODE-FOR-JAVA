@@ -1,0 +1,85 @@
+import java.util.*;
+
+class Crop {
+    String name;
+    int waterLevel;      // 0–100
+    int health;          // 0–100
+    boolean fertilizerDue;
+
+    Crop(String name) {
+        this.name = name;
+        this.waterLevel = 50;
+        this.health = 70;
+        this.fertilizerDue = false;
+    }
+
+    void waterCrop(int amount) {
+        waterLevel = Math.min(100, waterLevel + amount);
+        health = Math.min(100, health + (amount / 5));
+        System.out.println(name + " watered. Water Level: " + waterLevel + "% | Health: " + health + "%");
+    }
+
+    void checkStatus() {
+        if (waterLevel < 30) health -= 10;
+        if (health < 40) fertilizerDue = true;
+
+        System.out.println("\n-- Crop Status --");
+        System.out.println("Crop: " + name);
+        System.out.println("Water Level: " + waterLevel + "%");
+        System.out.println("Health: " + health + "%");
+        System.out.println("Fertilizer Needed: " + (fertilizerDue ? "YES" : "NO"));
+    }
+}
+
+public class FarmerManagementSystem {
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+        Map<String, Crop> farm = new HashMap<>();
+
+        while (true) {
+            System.out.println("\n==== Farmer Watering & Maintenance System ====");
+            System.out.println("1. Add Crop");
+            System.out.println("2. Water Crop");
+            System.out.println("3. Check Crop Status");
+            System.out.println("4. Exit");
+            System.out.print("Enter choice: ");
+            int ch = sc.nextInt();
+
+            if (ch == 1) {
+                System.out.print("Enter Crop Name: ");
+                String name = sc.next();
+                farm.put(name, new Crop(name));
+                System.out.println(name + " added to farm.");
+
+            } else if (ch == 2) {
+                System.out.print("Enter Crop Name to Water: ");
+                String name = sc.next();
+                if (farm.containsKey(name)) {
+                    System.out.print("Enter Water Amount (10–50): ");
+                    int amt = sc.nextInt();
+                    farm.get(name).waterCrop(amt);
+                } else {
+                    System.out.println("Crop not found.");
+                }
+
+            } else if (ch == 3) {
+                System.out.print("Enter Crop Name to Check: ");
+                String name = sc.next();
+                if (farm.containsKey(name)) {
+                    farm.get(name).checkStatus();
+                } else {
+                    System.out.println("Crop not found.");
+                }
+
+            } else if (ch == 4) {
+                System.out.println("System closed.");
+                break;
+
+            } else {
+                System.out.println("Invalid choice.");
+            }
+        }
+        sc.close();
+    }
+}
