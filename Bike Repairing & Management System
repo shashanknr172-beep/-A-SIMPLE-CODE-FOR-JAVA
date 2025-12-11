@@ -1,0 +1,120 @@
+import java.util.*;
+
+class Bike {
+    String ownerName;
+    String bikeModel;
+    String problem;
+    String status;
+    double repairCost;
+
+    Bike(String ownerName, String bikeModel, String problem) {
+        this.ownerName = ownerName;
+        this.bikeModel = bikeModel;
+        this.problem = problem;
+        this.status = "Received";
+        this.repairCost = 0;
+    }
+
+    void estimateCost() {
+        switch (problem.toLowerCase()) {
+            case "engine":
+                repairCost = 4500;
+                break;
+            case "brake":
+                repairCost = 1200;
+                break;
+            case "electrical":
+                repairCost = 1600;
+                break;
+            case "tyre":
+                repairCost = 900;
+                break;
+            default:
+                repairCost = 500;
+        }
+        System.out.println("Estimated Cost for " + bikeModel + ": ₹" + repairCost);
+    }
+
+    void updateStatus(String newStatus) {
+        this.status = newStatus;
+        System.out.println("Status updated: " + bikeModel + " → " + newStatus);
+    }
+
+    void showDetails() {
+        System.out.println("\n===== BIKE DETAILS =====");
+        System.out.println("Owner: " + ownerName);
+        System.out.println("Model: " + bikeModel);
+        System.out.println("Problem: " + problem);
+        System.out.println("Status: " + status);
+        System.out.println("Repair Cost: ₹" + repairCost);
+        System.out.println("========================\n");
+    }
+}
+
+public class BikeRepairManagement {
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+        Map<String, Bike> database = new HashMap<>();
+
+        while (true) {
+            System.out.println("\n====== BIKE REPAIR & MANAGEMENT SYSTEM ======");
+            System.out.println("1. Register Bike");
+            System.out.println("2. Estimate Repair Cost");
+            System.out.println("3. Update Status");
+            System.out.println("4. Show Bike Details");
+            System.out.println("5. Exit");
+            System.out.print("Enter choice: ");
+            int ch = sc.nextInt();
+
+            if (ch == 1) {
+                System.out.print("Owner Name: ");
+                String owner = sc.next();
+                System.out.print("Bike Model: ");
+                String model = sc.next();
+                System.out.print("Problem Type: ");
+                String prob = sc.next();
+
+                Bike b = new Bike(owner, model, prob);
+                database.put(model, b);
+                System.out.println("Bike registered successfully.");
+
+            } else if (ch == 2) {
+                System.out.print("Enter Bike Model: ");
+                String model = sc.next();
+                if (database.containsKey(model)) {
+                    database.get(model).estimateCost();
+                } else {
+                    System.out.println("Bike not found.");
+                }
+
+            } else if (ch == 3) {
+                System.out.print("Enter Bike Model: ");
+                String model = sc.next();
+                if (database.containsKey(model)) {
+                    System.out.print("Enter New Status (Repairing/Completed/Delivered): ");
+                    String st = sc.next();
+                    database.get(model).updateStatus(st);
+                } else {
+                    System.out.println("Bike not found.");
+                }
+
+            } else if (ch == 4) {
+                System.out.print("Enter Bike Model: ");
+                String model = sc.next();
+                if (database.containsKey(model)) {
+                    database.get(model).showDetails();
+                } else {
+                    System.out.println("Bike not found.");
+                }
+
+            } else if (ch == 5) {
+                System.out.println("System closed.");
+                break;
+            } else {
+                System.out.println("Invalid choice.");
+            }
+        }
+        sc.close();
+    }
+}
