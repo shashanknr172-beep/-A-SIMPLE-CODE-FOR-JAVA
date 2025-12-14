@@ -1,0 +1,140 @@
+import java.util.*;
+
+class Cycle {
+    String cycleId;
+    String model;
+    String frameType;
+    String status;
+    int cost;
+
+    Cycle(String cycleId, String model, String frameType) {
+        this.cycleId = cycleId;
+        this.model = model;
+        this.frameType = frameType;
+        this.status = "In Production";
+        calculateCost();
+    }
+
+    void calculateCost() {
+        int frameCost;
+        switch (frameType.toLowerCase()) {
+            case "aluminium":
+                frameCost = 4500;
+                break;
+            case "carbon":
+                frameCost = 8000;
+                break;
+            default:
+                frameCost = 3000;
+        }
+        int wheelCost = 2000;
+        int laborCost = 1500;
+        cost = frameCost + wheelCost + laborCost;
+    }
+
+    void completeCycle() {
+        status = "Completed";
+    }
+
+    void showDetails() {
+        System.out.println("ID: " + cycleId +
+                " | Model: " + model +
+                " | Frame: " + frameType +
+                " | Cost: ₹" + cost +
+                " | Status: " + status);
+    }
+}
+
+public class CycleManufacturingSystem {
+
+    static ArrayList<Cycle> cycles = new ArrayList<>();
+    static Scanner sc = new Scanner(System.in);
+
+    static void manufactureCycle() {
+        System.out.println("\n--- Manufacture New Cycle ---");
+        System.out.print("Enter Cycle ID: ");
+        String id = sc.next();
+        System.out.print("Enter Model: ");
+        String model = sc.next();
+        System.out.print("Frame Type (Steel/Aluminium/Carbon): ");
+        String frame = sc.next();
+
+        Cycle cycle = new Cycle(id, model, frame);
+        cycles.add(cycle);
+        System.out.println("Cycle manufactured successfully!");
+    }
+
+    static void completeCycle() {
+        System.out.print("Enter Cycle ID to complete: ");
+        String id = sc.next();
+
+        for (Cycle c : cycles) {
+            if (c.cycleId.equals(id)) {
+                c.completeCycle();
+                System.out.println("Cycle marked as completed.");
+                return;
+            }
+        }
+        System.out.println("Cycle not found.");
+    }
+
+    static void showInventory() {
+        System.out.println("\n--- Cycle Inventory ---");
+        if (cycles.isEmpty()) {
+            System.out.println("No cycles manufactured yet.");
+            return;
+        }
+        for (Cycle c : cycles) {
+            c.showDetails();
+        }
+    }
+
+    static void productionReport() {
+        int totalCost = 0, completed = 0;
+
+        for (Cycle c : cycles) {
+            totalCost += c.cost;
+            if (c.status.equals("Completed"))
+                completed++;
+        }
+
+        System.out.println("\n--- Production Report ---");
+        System.out.println("Total Cycles Produced: " + cycles.size());
+        System.out.println("Completed Cycles: " + completed);
+        System.out.println("Total Manufacturing Cost: ₹" + totalCost);
+    }
+
+    public static void main(String[] args) {
+        while (true) {
+            System.out.println("\n===== CYCLE MANUFACTURING SYSTEM =====");
+            System.out.println("1. Manufacture Cycle");
+            System.out.println("2. Complete Cycle");
+            System.out.println("3. Show Inventory");
+            System.out.println("4. Production Report");
+            System.out.println("5. Exit");
+            System.out.print("Enter choice: ");
+
+            int choice = sc.nextInt();
+
+            switch (choice) {
+                case 1:
+                    manufactureCycle();
+                    break;
+                case 2:
+                    completeCycle();
+                    break;
+                case 3:
+                    showInventory();
+                    break;
+                case 4:
+                    productionReport();
+                    break;
+                case 5:
+                    System.out.println("System shutting down...");
+                    return;
+                default:
+                    System.out.println("Invalid choice!");
+            }
+        }
+    }
+}
