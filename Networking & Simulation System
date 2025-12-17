@@ -1,0 +1,123 @@
+import java.util.*;
+
+class NetworkNode {
+    String name;
+    boolean active;
+
+    NetworkNode(String name) {
+        this.name = name;
+        this.active = true;
+    }
+}
+
+class Packet {
+    String source;
+    String destination;
+    String data;
+
+    Packet(String source, String destination, String data) {
+        this.source = source;
+        this.destination = destination;
+        this.data = data;
+    }
+}
+
+class NetworkSimulator {
+    List<NetworkNode> nodes = new ArrayList<>();
+    Random random = new Random();
+
+    void addNode(String name) {
+        nodes.add(new NetworkNode(name));
+        System.out.println("Node added: " + name);
+    }
+
+    NetworkNode findNode(String name) {
+        for (NetworkNode n : nodes) {
+            if (n.name.equalsIgnoreCase(name))
+                return n;
+        }
+        return null;
+    }
+
+    void sendPacket(Packet packet) {
+        NetworkNode src = findNode(packet.source);
+        NetworkNode dest = findNode(packet.destination);
+
+        if (src == null || dest == null) {
+            System.out.println("Invalid source or destination.");
+            return;
+        }
+
+        if (!src.active || !dest.active) {
+            System.out.println("Network error: One node is down.");
+            return;
+        }
+
+        int latency = random.nextInt(200) + 50; // ms
+        boolean packetLost = random.nextInt(10) < 2; // 20% loss
+
+        System.out.println("\nSending packet...");
+        System.out.println("From: " + packet.source + " → To: " + packet.destination);
+        System.out.println("Latency: " + latency + " ms");
+
+        if (packetLost) {
+            System.out.println(" Packet lost during transmission!");
+        } else 
+            System.out.println(" Packet delivered successfully!");
+            System.out.println("Data: " + packet.data);
+        }
+    }
+
+    void showNodes() {
+        System.out.println("\n--- Network Nodes ---");
+        for (NetworkNode n : nodes) {
+            System.out.println(n.name + " | Status: " + (n.active ? "ONLINE" : "OFFLINE"));
+        }
+    }
+}
+
+public class NetworkingSimulation {
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+        NetworkSimulator net = new NetworkSimulator();
+
+        while (true) {
+            System.out.println("\n===== NETWORK SIMULATION SYSTEM =====");
+            System.out.println("1. Add Network Node");
+            System.out.println("2. Send Packet");
+            System.out.println("3. View Network");
+            System.out.println("4. Exit");
+            System.out.print("Choose option: ");
+
+            int ch = sc.nextInt();
+
+            if (ch == 1) {
+                System.out.print("Enter Node Name: ");
+                String name = sc.next();
+                net.addNode(name);
+
+            } else if (ch == 2) {
+                System.out.print("Source Node: ");
+                String src = sc.next();
+                System.out.print("Destination Node: ");
+                String dest = sc.next();
+                System.out.print("Data: ");
+                String data = sc.next();
+
+                Packet p = new Packet(src, dest, data);
+                net.sendPacket(p);
+
+            } else if (ch == 3) {
+                net.showNodes();
+
+            } else if (ch == 4) {
+                System.out.println("Simulation ended.");
+                break;
+            } else {
+                System.out.println("Invalid option!");
+            }
+        }
+        sc.close();
+    }
+}
