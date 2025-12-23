@@ -1,0 +1,132 @@
+import java.util.Scanner;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+class Report {
+
+    private String title;
+    private String author;
+    private String department;
+    private String content;
+    private LocalDate date;
+
+    // Constructor
+    public Report(String title, String author, String department, String content) {
+        this.title = title;
+        this.author = author;
+        this.department = department;
+        this.content = content;
+        this.date = LocalDate.now();
+    }
+
+    // Method to format report
+    public void displayReport() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        System.out.println("\n============");
+        System.out.println("             REPORT FORMAT             ");
+        System.out.println("========================");
+        System.out.println("Title       : " + title);
+        System.out.println("Author      : " + author);
+        System.out.println("Department  : " + department);
+        System.out.println("Date        : " + date.format(formatter));
+        System.out.println("-------------------------");
+        System.out.println("Content:");
+        System.out.println(content);
+        System.out.println("==============\n");
+    }
+
+    // Update methods
+    public void updateTitle(String title) {
+        this.title = title;
+    }
+
+    public void updateAuthor(String author) {
+        this.author = author;
+    }
+
+    public void updateDepartment(String department) {
+        this.department = department;
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
+}
+
+public class ReportManagementSystem {
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        // Input report details
+        System.out.print("Enter Report Title: ");
+        String title = sc.nextLine();
+
+        System.out.print("Enter Author Name: ");
+        String author = sc.nextLine();
+
+        System.out.print("Enter Department: ");
+        String department = sc.nextLine();
+
+        System.out.print("Enter Report Content: ");
+        String content = sc.nextLine();
+
+        // Create report
+        Report report = new Report(title, author, department, content);
+
+        int choice;
+        do {
+            System.out.println("\n1. Display Report");
+            System.out.println("2. Update Title");
+            System.out.println("3. Update Author");
+            System.out.println("4. Update Department");
+            System.out.println("5. Update Content");
+            System.out.println("6. Exit");
+            System.out.print("Enter your choice: ");
+            choice = sc.nextInt();
+            sc.nextLine(); // consume newline
+
+            switch (choice) {
+                case 1:
+                    report.displayReport();
+                    break;
+
+                case 2:
+                    System.out.print("Enter new Title: ");
+                    report.updateTitle(sc.nextLine());
+                    System.out.println("Title updated successfully.");
+                    break;
+
+                case 3:
+                    System.out.print("Enter new Author Name: ");
+                    report.updateAuthor(sc.nextLine());
+                    System.out.println("Author updated successfully.");
+                    break;
+
+                case 4:
+                    System.out.print("Enter new Department: ");
+                    report.updateDepartment(sc.nextLine());
+                    System.out.println("Department updated successfully.");
+                    break;
+
+                case 5:
+                    System.out.print("Enter new Content: ");
+                    report.updateContent(sc.nextLine());
+                    System.out.println("Content updated successfully.");
+                    break;
+
+                case 6:
+                    System.out.println("Exiting Report System...");
+                    break;
+
+                default:
+                    System.out.println("Invalid choice!");
+            }
+
+        } while (choice != 6);
+
+        sc.close();
+    }
+}
