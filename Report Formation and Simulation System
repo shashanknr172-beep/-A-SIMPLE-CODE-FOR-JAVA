@@ -1,0 +1,260 @@
+// -----------------
+// REPORT FORMATION AND SIMULATION SYSTEM
+// -----------------------------
+// Language : Java
+// Type     : Console Application
+// Purpose  : Academic Mini Project
+// ---------------------
+
+import java.util.*;
+import java.time.LocalDate;
+
+// ----------------------------
+// SIMULATION CLASS
+// -----------------------------------
+class Simulation {
+    private int simulationId;
+    private String simulationName;
+    private int inputValue;
+    private double result;
+    private LocalDate date;
+
+    public Simulation(int simulationId, String simulationName, int inputValue) {
+        this.simulationId = simulationId;
+        this.simulationName = simulationName;
+        this.inputValue = inputValue;
+        this.date = LocalDate.now();
+    }
+
+    public void runSimulation() {
+        Random rand = new Random();
+        this.result = inputValue * (0.5 + rand.nextDouble());
+    }
+
+    public double getResult() {
+        return result;
+    }
+
+    public int getSimulationId() {
+        return simulationId;
+    }
+
+    public String getSimulationName() {
+        return simulationName;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public int getInputValue() {
+        return inputValue;
+    }
+}
+
+// ---------------------------------
+// REPORT CLASS
+// -------------------------------------------
+class Report {
+    private int reportId;
+    private Simulation simulation;
+    private String remarks;
+
+    public Report(int reportId, Simulation simulation) {
+        this.reportId = reportId;
+        this.simulation = simulation;
+        generateRemarks();
+    }
+
+    private void generateRemarks() {
+        if (simulation.getResult() > simulation.getInputValue()) {
+            remarks = "Simulation successful with high efficiency.";
+        } else {
+            remarks = "Simulation completed with normal efficiency.";
+        }
+    }
+
+    public void displayReport() {
+        System.out.println("\n----------- SIMULATION REPORT ----------");
+        System.out.println("Report ID        : " + reportId);
+        System.out.println("Simulation ID    : " + simulation.getSimulationId());
+        System.out.println("Simulation Name  : " + simulation.getSimulationName());
+        System.out.println("Simulation Date  : " + simulation.getDate());
+        System.out.println("Input Value      : " + simulation.getInputValue());
+        System.out.printf("Output Result    : %.2f%n", simulation.getResult());
+        System.out.println("Remarks          : " + remarks);
+        System.out.println("---------------------------------");
+    }
+}
+
+// -------------------------------
+// MAIN SYSTEM CLASS
+// ----------------------------------
+class ReportSimulationSystem {
+    private ArrayList<Simulation> simulations = new ArrayList<>();
+    private ArrayList<Report> reports = new ArrayList<>();
+    private Scanner sc = new Scanner(System.in);
+
+    private int simulationCount = 1;
+    private int reportCount = 1;
+
+    // -----------------------
+    // CREATE SIMULATION
+    // --------------------------------
+    public void createSimulation() {
+        System.out.println("\nCreate New Simulation");
+        System.out.print("Enter Simulation Name: ");
+        String name = sc.nextLine();
+
+        System.out.print("Enter Input Value: ");
+        int input = sc.nextInt();
+        sc.nextLine();
+
+        Simulation sim = new Simulation(simulationCount, name, input);
+        simulations.add(sim);
+
+        System.out.println("Simulation created successfully!");
+        simulationCount++;
+    }
+
+    // -----------------------
+    // RUN SIMULATION
+    // -----------------------------
+    public void runSimulation() {
+        if (simulations.isEmpty()) {
+            System.out.println("\nNo simulations available.");
+            return;
+        }
+
+        listSimulations();
+        System.out.print("Enter Simulation ID to run: ");
+        int id = sc.nextInt();
+        sc.nextLine();
+
+        Simulation sim = findSimulation(id);
+        if (sim == null) {
+            System.out.println("Invalid Simulation ID!");
+            return;
+        }
+
+        sim.runSimulation();
+        System.out.println("Simulation executed successfully!");
+    }
+
+    // ----------------------------------------------
+    // GENERATE REPORT
+    // ----------------------------------------------
+    public void generateReport() {
+        if (simulations.isEmpty()) {
+            System.out.println("\nNo simulations available.");
+            return;
+        }
+
+        listSimulations();
+        System.out.print("Enter Simulation ID for report: ");
+        int id = sc.nextInt();
+        sc.nextLine();
+
+        Simulation sim = findSimulation(id);
+        if (sim == null) {
+            System.out.println("Invalid Simulation ID!");
+            return;
+        }
+
+        Report report = new Report(reportCount, sim);
+        reports.add(report);
+
+        System.out.println("Report generated successfully!");
+        reportCount++;
+    }
+
+    // --------------------------------
+    // VIEW REPORTS
+    // ------------------------------
+    public void viewReports() {
+        if (reports.isEmpty()) {
+            System.out.println("\nNo reports available.");
+            return;
+        }
+
+        for (Report r : reports) {
+            r.displayReport();
+        }
+    }
+
+    // --------------------------------
+    // LIST SIMULATIONS
+    // --------------------------------
+    public void listSimulations() {
+        System.out.println("\nAvailable Simulations:");
+        for (Simulation s : simulations) {
+            System.out.println("ID: " + s.getSimulationId() +
+                               " | Name: " + s.getSimulationName() +
+                               " | Input: " + s.getInputValue());
+        }
+    }
+
+    // --------------------------
+    // FIND SIMULATION BY ID
+    // ---------------------------------
+    private Simulation findSimulation(int id) {
+        for (Simulation s : simulations) {
+            if (s.getSimulationId() == id) {
+                return s;
+            }
+        }
+        return null;
+    }
+
+    // ------------------------
+    // SYSTEM SUMMARY
+    // -------------------------------
+    public void systemSummary() {
+        System.out.println("\nSystem Summary");
+        System.out.println("----------------------");
+        System.out.println("Total Simulations : " + simulations.size());
+        System.out.println("Total Reports     : " + reports.size());
+    }
+
+    // -------------------------------------
+    // MAIN MENU
+    // ----------------------------------------------
+    public void menu() {
+        while (true) {
+            System.out.println("\n--- REPORT FORMATION & SIMULATION SYSTEM ---");
+            System.out.println("1. Create Simulation");
+            System.out.println("2. Run Simulation");
+            System.out.println("3. Generate Report");
+            System.out.println("4. View Reports");
+            System.out.println("5. System Summary");
+            System.out.println("6. Exit");
+            System.out.print("Enter your choice: ");
+
+            int choice = sc.nextInt();
+            sc.nextLine();
+
+            switch (choice) {
+                case 1 -> createSimulation();
+                case 2 -> runSimulation();
+                case 3 -> generateReport();
+                case 4 -> viewReports();
+                case 5 -> systemSummary();
+                case 6 -> {
+                    System.out.println("Exiting system...");
+                    return;
+                }
+                default -> System.out.println("Invalid choice! Try again.");
+            }
+        }
+    }
+}
+
+// ----------------------------
+// MAIN EXECUTION CLASS
+// ---------------------
+public class Main {
+    public static void main(String[] args) {
+        ReportSimulationSystem system = new ReportSimulationSystem();
+        system.menu();
+    }
+}
