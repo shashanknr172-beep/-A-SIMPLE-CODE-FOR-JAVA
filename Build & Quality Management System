@@ -1,0 +1,99 @@
+import java.time.LocalDateTime;
+import java.util.Random;
+
+class Project {
+    private final String name;
+    private final String language;
+    private final String version;
+    private boolean testsPassed;
+    private int coverage;
+    private int qualityScore;
+
+    public Project(String name, String language, String version) {
+        this.name = name;
+        this.language = language;
+        this.version = version;
+    }
+
+    public boolean build() {
+        System.out.println("[BUILD] Building " + name +
+                " (" + language + " " + version + ")");
+        return true;
+    }
+
+    public boolean runTests() {
+        System.out.println("[TEST] Running unit tests...");
+        testsPassed = new Random().nextBoolean();
+        return testsPassed;
+    }
+
+    public void generateCoverage() {
+        coverage = new Random().nextInt(36) + 60;
+        System.out.println("[COVERAGE] " + coverage + "%");
+    }
+
+    public void staticAnalysis() {
+        qualityScore = new Random().nextInt(31) + 70;
+        System.out.println("[ANALYSIS] Quality Score: " + qualityScore);
+    }
+
+    public void report() {
+        System.out.println("\n------ BUILD REPORT ------");
+        System.out.println("Project       : " + name);
+        System.out.println("Language      : " + language);
+        System.out.println("Version       : " + version);
+        System.out.println("Tests Passed  : " + testsPassed);
+        System.out.println("Coverage      : " + coverage + "%");
+        System.out.println("Quality Score : " + qualityScore + "/100");
+        System.out.println("Timestamp     : " + LocalDateTime.now());
+        System.out.println("----------");
+    }
+
+    public boolean qualityGate() {
+        return testsPassed && coverage >= 70 && qualityScore >= 80;
+    }
+}
+
+class CICDPipeline {
+    private final Project project;
+
+    public CICDPipeline(Project project) {
+        this.project = project;
+    }
+
+    public void execute() {
+        if (!project.build()) {
+            System.out.println(" Build Failed");
+            return;
+        }
+
+        if (!project.runTests()) {
+            System.out.println(" Tests Failed");
+            return;
+        }
+
+        project.generateCoverage();
+        project.staticAnalysis();
+
+        if (project.qualityGate()) {
+            System.out.println(" Quality Gate Passed");
+        } else {
+            System.out.println(" Quality Gate Failed");
+        }
+
+        project.report();
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Project project = new Project(
+                "Modern Java Build System",
+                "Java",
+                "21"
+        );
+
+        CICDPipeline pipeline = new CICDPipeline(project);
+        pipeline.execute();
+    }
+}
