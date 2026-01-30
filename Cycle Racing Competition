@@ -1,0 +1,109 @@
+import java.util.Scanner;
+import java.util.Random;
+
+class Rider {
+    String name;
+    double speed;
+    double totalTime;
+
+    // Constructor
+    Rider(String name) {
+        this.name = name;
+        this.speed = 0;
+        this.totalTime = 0;
+    }
+
+    // Generate random speed
+    void generateSpeed() {
+        Random rand = new Random();
+        speed = 20 + rand.nextInt(21); // 20 to 40 km/h
+    }
+
+    // Calculate lap time
+    void calculateLapTime(double distance) {
+        double time = distance / speed; // time in hours
+        totalTime += time;
+    }
+
+    // Display rider details
+    void display() {
+        System.out.println("Rider: " + name);
+        System.out.println("Speed: " + speed + " km/h");
+        System.out.println("Total Time: " + totalTime + " hours");
+        System.out.println("---------------");
+    }
+}
+
+public class CycleRacingCompetition {
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        System.out.println("===== Cycle Racing Competition =====");
+
+        // Input number of riders
+        System.out.print("Enter number of riders: ");
+        int n = sc.nextInt();
+        sc.nextLine();
+
+        Rider[] riders = new Rider[n];
+
+        // Input rider names
+        for (int i = 0; i < n; i++) {
+            System.out.print("Enter name of rider " + (i + 1) + ": ");
+            String name = sc.nextLine();
+            riders[i] = new Rider(name);
+        }
+
+        // Input race details
+        System.out.print("Enter number of laps: ");
+        int laps = sc.nextInt();
+
+        System.out.print("Enter distance per lap (km): ");
+        double distance = sc.nextDouble();
+
+        System.out.println("\nRace Started...\n");
+
+        // Race simulation
+        for (int lap = 1; lap <= laps; lap++) {
+
+            System.out.println("Lap " + lap + " Results:");
+
+            for (int i = 0; i < n; i++) {
+
+                riders[i].generateSpeed();
+                riders[i].calculateLapTime(distance);
+
+                System.out.println(riders[i].name +
+                        " | Speed: " + riders[i].speed + " km/h");
+            }
+
+            System.out.println("--------------");
+        }
+
+        // Display final results
+        System.out.println("\n===== Final Results =====\n");
+
+        for (int i = 0; i < n; i++) {
+            riders[i].display();
+        }
+
+        // Find winner
+        Rider winner = riders[0];
+
+        for (int i = 1; i < n; i++) {
+            if (riders[i].totalTime < winner.totalTime) {
+                winner = riders[i];
+            }
+        }
+
+        // Display winner
+        System.out.println(" Winner: " + winner.name);
+        System.out.println("Time: " + winner.totalTime + " hours");
+
+        System.out.println("\nThank You for Participating!");
+
+        sc.close();
+    }
+}
